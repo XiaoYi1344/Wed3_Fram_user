@@ -74,7 +74,7 @@ const Nav = ({ openNav }: Props) => {
       ? localStorage.getItem("accessToken")
       : null;
 
-  console.log("Token:", accessToken); // 👉 xem token có thật không
+  // console.log("Token:", accessToken); // 👉 xem token có thật không
   setIsLoggedIn(!!accessToken);
 }, []);
 

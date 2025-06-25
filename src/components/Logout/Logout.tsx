@@ -47,7 +47,7 @@ const LogoutButton: React.FC<LogoutButtonProps> = ({
 
       // Gọi API logout
       const response = await axios.post(
-        "https://9637-2a09-bac5-d46c-18c8-00-278-42.ngrok-free.app/api/authentication/log-out",
+        "https://f699-2a09-bac1-7aa0-10-00-277-43.ngrok-free.app/api/authentication/log-out",
         { refreshToken },
         {
           headers: {
@@ -56,6 +56,8 @@ const LogoutButton: React.FC<LogoutButtonProps> = ({
           },
         }
       );
+      console.log("AccessToken: ", accessToken);
+      console.log("RefreshToken: ", refreshToken);
 
       // Nếu logout thành công
       if (response.data?.success) {

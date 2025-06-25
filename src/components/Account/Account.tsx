@@ -39,16 +39,16 @@ const Account = () => {
         }
 
         const res = await axios.get(
-          "https://c645-2a09-bac1-7ac0-10-00-2e5-38.ngrok-free.app/api/user/get-user",
+          "https://f699-2a09-bac1-7aa0-10-00-277-43.ngrok-free.app/api/user/get-user",
           {
             headers: {
               Authorization: `Bearer ${token}`,
-              Accept: "application/json",
+       
               // "Ngrok-Skip-Browser-Warning": "1", // ✅ Tránh bị trả về HTML
             },
-            maxRedirects: 0,
+            // maxRedirects: 0,
             withCredentials: true,
-            validateStatus: () => true, // Đừng tự động throw nếu status >= 400
+            // validateStatus: () => true, // Đừng tự động throw nếu status >= 400
           }
         );
 

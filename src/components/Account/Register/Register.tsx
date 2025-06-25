@@ -1,4 +1,5 @@
 "use client";
+
 import {
   Box,
   Breadcrumbs,
@@ -16,7 +17,19 @@ import { FcGoogle } from "react-icons/fc";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 
-const Register = () => {
+type RegisterProps = {
+  onSuccess?: ({
+    userId,
+    email,
+    phone,
+  }: {
+    userId: string;
+    email: string;
+    phone: string;
+  }) => void;
+};
+
+const Register: React.FC<RegisterProps> = ({ onSuccess }) => {
   const router = useRouter();
 
   const [formData, setFormData] = useState({
@@ -30,8 +43,6 @@ const Register = () => {
   });
 
   const [loading, setLoading] = useState(false);
-  // const [errorPass, setErrorPass] = useState("");
-  // const [errorConfirmPass, setErrorConfirmPass] = useState("");
   const [snackOpen, setSnackOpen] = useState(false);
   const [snackMessage, setSnackMessage] = useState("");
   const [snackSeverity, setSnackSeverity] = useState<AlertColor>("success");
@@ -42,14 +53,6 @@ const Register = () => {
   const validatePhone = (phone: string) => /^[0-9]{10}$/.test(phone.trim());
 
   const validatePassword = (password: string) => password.length >= 6;
-
-  // const validatePasswords = () => {
-  //   if (formData.password !== formData.confirmPassword) {
-  //     setErrorConfirmPass("Mật khẩu nhập lại không khớp");
-  //     return false;
-  //   }
-  //   return true;
-  // };
 
   const openSnackbar = (message: string, severity: AlertColor = "success") => {
     setSnackMessage(message);
@@ -63,11 +66,7 @@ const Register = () => {
     };
 
   const handleRegister = async () => {
-    if (
-      !formData.userName ||
-      !formData.fullName ||
-      !formData.password 
-    ) {
+    if (!formData.userName || !formData.fullName || !formData.password) {
       openSnackbar("Vui lòng điền đầy đủ thông tin bắt buộc", "error");
       return;
     }
@@ -90,11 +89,6 @@ const Register = () => {
       return;
     }
 
-    // if (!validatePasswords()) {
-    //   openSnackbar("Mật khẩu nhập lại không khớp", "error");
-    //   return;
-    // }
-
     if (!validatePassword(formData.password)) {
       openSnackbar("Mật khẩu phải có ít nhất 6 ký tự", "error");
       return;
@@ -114,19 +108,13 @@ const Register = () => {
       setLoading(true);
 
       const response = await axios.post(
-        "https://9637-2a09-bac5-d46c-18c8-00-278-42.ngrok-free.app/api/authentication/register",
+        "https://f699-2a09-bac1-7aa0-10-00-277-43.ngrok-free.app/api/authentication/register",
         payload,
         { withCredentials: true }
       );
 
       const data = response.data;
-      console.log("Dữ liệu:", response);
-       console.log("Register Response:", data); // 👈 kiểm tra ở đây
-      console.log(
-        "✅ Register API Raw Response:",
-        JSON.stringify(data, null, 2)
-      );
-      
+      console.log("Register Response:", data);
 
       if (!response.status || !data?.data?.userId) {
         openSnackbar("Đăng ký thất bại", "error");
@@ -136,9 +124,18 @@ const Register = () => {
       openSnackbar("Đăng ký thành công", "success");
 
       const userId = data.data.userId;
-      router.push(
-        `/verify-otp?email=${formData.email}&phone=${formData.phone}&userId=${userId}`
-      );
+
+      if (onSuccess) {
+        onSuccess({
+          userId,
+          email: formData.email,
+          phone: formData.phone,
+        });
+      } else {
+        router.push(
+          `/verify-otp?email=${formData.email}&phone=${formData.phone}&userId=${userId}`
+        );
+      }
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         const message =
@@ -153,14 +150,31 @@ const Register = () => {
   };
 
   return (
-    <Box pt={22} pb={10}>
-      <Stack px={{ xs: 2, md: 15 }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        py: 25,
+        backgroundImage: 'url("/img/b.png")',
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
+      <Stack px={{ xs: 2, md: 15 }} mb={4}>
         <Breadcrumbs aria-label="breadcrumb">
           <Link
-            color="inherit"
             href="/"
             underline="none"
-            sx={{ "&:hover": { color: "black" } }}
+            sx={{
+              display: "inline-block",
+              color: "#ff8d2f",
+              transition: "transform 0.3s ease, color 0.3s ease",
+              "&:hover": {
+                color: "#ff6b00",
+                transform: "scale(1.05)",
+              },
+            }}
           >
             Home
           </Link>
@@ -171,113 +185,123 @@ const Register = () => {
       <Box
         display="flex"
         flexDirection={{ xs: "column", md: "row" }}
-        gap={4}
-        mt={3}
+        width="80%"
+        mx="auto"
+        boxShadow="0 10px 30px rgba(0,0,0,0.1)"
+        borderRadius={{ md: "2rem" }}
+        overflow="hidden"
       >
         <Box
-          flex={1}
+          flex={{ md: "1 1 40%" }}
+          bgcolor="#ffcb6a"
           display="flex"
           justifyContent="center"
-          alignItems="center"
-          sx={{ ml: "-35vh" }}
-          p={2}
+          alignItems="stretch"
+          height="100%"
         >
           <Image
-            src="/img/account.png"
-            alt="Account"
-            width={706}
-            height={781}
-            style={{ objectFit: "contain" }}
+            src="/img/Form1.png"
+            alt="Register Illustration"
+            width={397}
+            height={400}
+            style={{
+              objectFit: "contain",
+              maxWidth: "100%",
+              height: "auto",
+            }}
           />
         </Box>
 
         <Box
-          flex={1}
-          maxWidth={500}
-          mx="auto"
-          alignSelf="center"
-          mr={{ xs: 2, md: 15 }}
-          sx={{ ml: "-6px" }}
+          flex={{ md: "1 1 60%" }}
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          sx={{
+            background: "rgba(255, 247, 232, 0.3)",
+            backdropFilter: "blur(3px)",
+            WebkitBackdropFilter: "blur(10px)",
+            border: "1px solid rgba(255,255,255,0.2)",
+          }}
         >
-          <Typography variant="h5" fontWeight={600} mb={1} fontSize={35}>
-            Create an account
-          </Typography>
-          <Typography color="textSecondary" fontSize={15} mb={3}>
-            Enter your details below
-          </Typography>
-
-          <Stack spacing={2}>
-            <TextField
-              label="Full Name"
-              variant="standard"
-              value={formData.fullName}
-              onChange={handleChange("fullName")}
-            />
-            <TextField
-              label="User Name"
-              variant="standard"
-              value={formData.userName}
-              onChange={handleChange("userName")}
-            />
-            <TextField
-              label="Email"
-              variant="standard"
-              value={formData.email}
-              onChange={handleChange("email")}
-            />
-            <TextField
-              label="Phone"
-              variant="standard"
-              value={formData.phone}
-              onChange={handleChange("phone")}
-            />
-            <TextField
-              label="Year of Birth"
-              type="number"
-              variant="standard"
-              value={formData.yearOfBirth}
-              onChange={handleChange("yearOfBirth")}
-            />
-            <TextField
-              label="Password"
-              type="password"
-              variant="standard"
-              value={formData.password}
-              onChange={handleChange("password")}
-            />
-            {/* <TextField label="Confirm Password" type="password" variant="standard" value={formData.confirmPassword} onChange={handleChange("confirmPassword")} /> */}
-
-            <Button
-              variant="contained"
-              color="warning"
-              fullWidth
-              sx={{ textTransform: "none" }}
-              onClick={handleRegister}
-              disabled={loading}
-            >
-              {loading ? "Creating..." : "Create Account"}
-            </Button>
-
-            <Button
-              variant="outlined"
-              fullWidth
-              startIcon={<FcGoogle />}
-              sx={{ textTransform: "none" }}
-            >
-              Sign up with Google
-            </Button>
-
-            <Typography fontSize={14} textAlign="center">
-              Already have an account?{" "}
-              <Link href="/login" underline="hover">
-                Log in
-              </Link>
+          <Box maxWidth={500} width="100%" p={6}>
+            <Typography variant="h5" fontWeight={700} mb={1} fontSize={32}>
+              Create an Account
             </Typography>
-          </Stack>
+            <Typography color="textSecondary" fontSize={15} mb={3}>
+              Enter your details below
+            </Typography>
+
+            <Stack spacing={2}>
+              <TextField
+                label="Full Name"
+                variant="standard"
+                value={formData.fullName}
+                onChange={handleChange("fullName")}
+              />
+              <TextField
+                label="User Name"
+                variant="standard"
+                value={formData.userName}
+                onChange={handleChange("userName")}
+              />
+              <TextField
+                label="Email"
+                variant="standard"
+                value={formData.email}
+                onChange={handleChange("email")}
+              />
+              <TextField
+                label="Phone"
+                variant="standard"
+                value={formData.phone}
+                onChange={handleChange("phone")}
+              />
+              <TextField
+                label="Year of Birth"
+                type="number"
+                variant="standard"
+                value={formData.yearOfBirth}
+                onChange={handleChange("yearOfBirth")}
+              />
+              <TextField
+                label="Password"
+                type="password"
+                variant="standard"
+                value={formData.password}
+                onChange={handleChange("password")}
+              />
+
+              <Button
+                variant="contained"
+                color="warning"
+                fullWidth
+                sx={{ textTransform: "none" }}
+                onClick={handleRegister}
+                disabled={loading}
+              >
+                {loading ? "Creating..." : "Create Account"}
+              </Button>
+
+              <Button
+                variant="outlined"
+                fullWidth
+                startIcon={<FcGoogle />}
+                sx={{ textTransform: "none" }}
+              >
+                Sign up with Google
+              </Button>
+
+              <Typography fontSize={14} textAlign="center">
+                Already have an account?{" "}
+                <Link href="/login" underline="hover">
+                  Log in
+                </Link>
+              </Typography>
+            </Stack>
+          </Box>
         </Box>
       </Box>
-      {/* {errorPass && <p className="text-red-500 text-sm">{errorPass}</p>}
-{errorConfirmPass && <p className="text-red-500 text-sm">{errorConfirmPass}</p>} */}
 
       <Snackbar
         open={snackOpen}
