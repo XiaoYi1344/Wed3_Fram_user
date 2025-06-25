@@ -1,5 +1,5 @@
 import { Product } from "@/data";
-import { Rating } from "@mui/material";
+import { Rating, Stack } from "@mui/material";
 
 type Props = {
   product: Product;
@@ -7,7 +7,8 @@ type Props = {
 
 export default function ProductInfo({ product }: Props) {
   return (
-    <div className="flex flex-col gap-4">
+    <Stack my={20}>
+      <div className="flex flex-col gap-4 ">
       <h1 className="text-2xl font-semibold">{product.title}</h1>
 
       <div className="flex items-center gap-2">
@@ -62,5 +63,6 @@ export default function ProductInfo({ product }: Props) {
         <p>🔁 Return in 30 days</p>
       </div>
     </div>
+    </Stack>
   );
 }

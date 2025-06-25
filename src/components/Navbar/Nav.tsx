@@ -69,12 +69,15 @@ const Nav = ({ openNav }: Props) => {
   }, [open]);
 
   useEffect(() => {
-    const accessToken =
-      typeof window !== "undefined"
-        ? localStorage.getItem("accessToken")
-        : null;
-    setIsLoggedIn(!!accessToken);
-  }, []);
+  const accessToken =
+    typeof window !== "undefined"
+      ? localStorage.getItem("accessToken")
+      : null;
+
+  console.log("Token:", accessToken); // 👉 xem token có thật không
+  setIsLoggedIn(!!accessToken);
+}, []);
+
 
   const handleLanguageChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     setLanguage(e.target.value);
@@ -88,7 +91,11 @@ const Nav = ({ openNav }: Props) => {
   };
 
   const menuItems = [
-    { icon: <FaRegUser />, label: "Manage My Account", href: "/account/profile" },
+    {
+      icon: <FaRegUser />,
+      label: "Manage My Account",
+      href: "/account/profile",
+    },
     { icon: <FaShoppingBag />, label: "My Order", href: "/orders" },
     {
       icon: <FaTimesCircle />,
@@ -194,9 +201,13 @@ const Nav = ({ openNav }: Props) => {
                 ),
               }}
             />
-            <Button variant="ghost" size="icon" onClick={() => router.push("/wishlist")}>
-      <FiHeart className="w-5 h-5" />
-    </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => router.push("/wishlist")}
+            >
+              <FiHeart className="w-5 h-5" />
+            </Button>
             <Button variant="ghost" size="icon" className="relative">
               <FiShoppingCart className="w-6 h-6" />
               <Badge

@@ -10,7 +10,7 @@ import { jwtDecode } from "jwt-decode";
 
 interface LogoutButtonProps {
   refreshToken: string;
-  onLoggedOut?: () => void; // optional callback
+  onLoggedOut?: () => void;
 }
 
 const LogoutButton: React.FC<LogoutButtonProps> = ({
@@ -29,66 +29,82 @@ const LogoutButton: React.FC<LogoutButtonProps> = ({
 
     const accessToken = localStorage.getItem("accessToken");
 
-    if (!accessToken) {
-      setError("Bạn chưa đăng nhập hoặc thiếu token.");
-      setLoading(false);
+    // Trường hợp thiếu token
+    if (!accessToken || !refreshToken) {
+      clearTokensAndRedirect("Thiếu accessToken hoặc refreshToken. Vui lòng đăng nhập lại.");
       return;
     }
 
-    // ✅ Kiểm tra accessToken còn hạn không
     try {
+      // Kiểm tra hạn token
       const decoded: { exp?: number } = jwtDecode(accessToken);
       const isExpired = !decoded.exp || decoded.exp * 1000 < Date.now();
 
       if (isExpired) {
-        setError("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-        router.push("/login");
+        clearTokensAndRedirect("Phiên đăng nhập đã hết hạn.");
         return;
       }
-    } catch (decodeError) {
-        console.log(decodeError);
-        
-      setError("Token không hợp lệ. Vui lòng đăng nhập lại.");
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
-      router.push("/login");
-      return;
-    }
 
-    // ✅ Gọi API logout
-    try {
+      // Gọi API logout
       const response = await axios.post(
-        "http://192.168.1.100:3001/api/authentication/log-out",
+        "https://9637-2a09-bac5-d46c-18c8-00-278-42.ngrok-free.app/api/authentication/log-out",
         { refreshToken },
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
+            Accept: "application/json",
           },
         }
       );
 
-      if (response.data.success) {
+      // Nếu logout thành công
+      if (response.data?.success) {
         setSuccessMessage("Đăng xuất thành công.");
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-
-        if (onLoggedOut) onLoggedOut(); // Gọi callback nếu có
-
-        router.push("/login");
+        clearTokensAndRedirect();
       } else {
-        setError(response.data.message || "Đã xảy ra lỗi.");
+        setError(response.data?.message || "Đăng xuất không thành công.");
       }
-    } catch (err: unknown) {
-      const axiosError = err as AxiosError<{ message?: string }>;
+    } catch (err) {
+      const axiosErr = err as AxiosError<{ message?: string }>;
+
+      // Nếu lỗi liên quan đến token => clear luôn
+      const isTokenError =
+        axiosErr.message.includes("jwt") ||
+        axiosErr.message.includes("token") ||
+        axiosErr.response?.data?.message?.toLowerCase().includes("token");
+
+      if (isTokenError) {
+        clearTokensAndRedirect("Token không hợp lệ hoặc đã hết hạn.");
+        return;
+      }
+
+      // Lỗi khác
       setError(
-        axiosError.response?.data?.message ||
-          "Lỗi kết nối hoặc máy chủ không phản hồi."
+        axiosErr.response?.data?.message ||
+          "Lỗi không xác định. Vui lòng thử lại sau."
       );
     } finally {
       setLoading(false);
     }
+  };
+
+  const clearTokensAndRedirect = (msg?: string) => {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+
+    if (msg) {
+      setError(msg);
+    } else {
+      setError(null);
+      setSuccessMessage(null);
+    }
+
+    if (onLoggedOut) onLoggedOut();
+
+    // Redirect sau một chút để UI có thời gian cập nhật
+    setTimeout(() => {
+      router.push("/login");
+    }, 100);
   };
 
   return (

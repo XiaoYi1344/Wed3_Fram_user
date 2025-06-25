@@ -24,19 +24,17 @@ interface DecodedToken {
   permission?: string[];
   roles?: string[];
   role?: string;
+  iat?: number;
+  exp?: number;
 }
 
-// Kiểu phản hồi từ backend
 interface LoginResponse {
   accessToken?: string;
   token?: string;
   jwt?: string;
   data?: {
     accessToken?: string;
-  };
-  user?: {
-    email?: string;
-    roles?: string[];
+    refreshToken?: string;
   };
 }
 
@@ -49,78 +47,82 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
+  if (!emailOrPhone || !password) {
+    setError("Vui lòng nhập đầy đủ email/số điện thoại và mật khẩu.");
+    return;
+  }
+
+  const isEmail = /\S+@\S+\.\S+/.test(emailOrPhone);
+  const isPhone = /^\d{9,11}$/.test(emailOrPhone);
+
+  if (!isEmail && !isPhone) {
+    setError("Định dạng email hoặc số điện thoại không hợp lệ.");
+    return;
+  }
+
   setError(null);
   setLoading(true);
 
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 7000); // timeout 7s
+
     const payload = { email: emailOrPhone, password };
 
-    const res = await axios.post(
-      "http://192.168.1.100:3001/api/authentication/login",
+    const { data } = await axios.post<LoginResponse>(
+      "https://c645-2a09-bac1-7ac0-10-00-2e5-38.ngrok-free.app/api/authentication/login",
       payload,
-      { withCredentials: true }
+      { signal: controller.signal, withCredentials: true }
     );
 
-    let data: LoginResponse;
-    if (typeof res.data === "string") {
-      data = JSON.parse(res.data);
-    } else {
-      data = res.data;
+    clearTimeout(timeout);
+
+    const accessToken = data.accessToken || data.token || data.jwt || data?.data?.accessToken;
+    const refreshToken = data?.data?.refreshToken;
+
+    if (!accessToken || !refreshToken) throw new Error("Không nhận được token.");
+
+    if (typeof window !== "undefined") {
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
+
+      const decoded = jwtDecode<DecodedToken>(accessToken);
+      const role = decoded.roles?.[0] || decoded.permission?.[0] || decoded.role || "user";
+
+      localStorage.setItem(
+        "userInfo",
+        JSON.stringify({
+          email: decoded.email ?? "Không có",
+          phone: decoded.phone ?? "Không có",
+          role,
+        })
+      );
     }
 
-    const accessToken =
-      data.accessToken || data.token || data.jwt || data?.data?.accessToken;
-
-    if (!accessToken) {
-      throw new Error("Không nhận được access token từ server.");
-    }
-
-    localStorage.setItem("accessToken", accessToken);
-    const decoded = jwtDecode<DecodedToken & { iat?: number; exp?: number }>(accessToken);
-
-    // 👉 Log ra console
-    console.log("✅ Đăng nhập thành công!");
-    console.log("AccessToken:", accessToken);
-    console.log("iat:", decoded.iat);
-    console.log("exp:", decoded.exp);
-    console.log("Full response:", data);
-
-    const role =
-      decoded.roles?.[0] || decoded.permission?.[0] || decoded.role || "user";
-
-    const userInfo = {
-      email: decoded.email ?? "Không có",
-      phone: decoded.phone ?? "Không có",
-      role,
-    };
-
-    localStorage.setItem("userInfo", JSON.stringify(userInfo));
-
-    // 👉 Hiển thị alert (tuỳ chọn)
-    alert("🎉 Đăng nhập thành công!");
-
-    // Chuyển trang
     router.push("/account/profile");
-
   } catch (err: unknown) {
-    if (axios.isAxiosError(err)) {
-      const message =
-        err.response?.data?.message || "Có lỗi xảy ra khi đăng nhập";
-      setError(message);
-    } else if (err instanceof Error) {
-      setError(err.message);
+  if (axios.isAxiosError(err)) {
+    if (err.code === "ERR_CANCELED") {
+      setError("Yêu cầu quá lâu. Vui lòng thử lại.");
     } else {
-      setError("Lỗi đăng nhập không xác định.");
+      const msg =
+        (err.response?.data as { message?: string; detail?: string })?.message ||
+        (err.response?.data as { detail?: string })?.detail ||
+        "Sai thông tin đăng nhập.";
+      setError(msg);
     }
+  } else if (err instanceof Error) {
+    setError(err.message);
+  } else {
+    setError("Lỗi không xác định khi đăng nhập.");
+  }
   } finally {
     setLoading(false);
   }
 };
 
-
   return (
     <Box pt={22} pb={10}>
-      {/* Breadcrumb */}
       <Stack px={{ xs: 2, md: 15 }}>
         <Breadcrumbs aria-label="breadcrumb">
           <Link href="/" underline="none" sx={{ "&:hover": { color: "black" } }}>
@@ -137,8 +139,14 @@ const Login = () => {
       </Stack>
 
       <Box display="flex" flexDirection={{ xs: "column", md: "row" }} gap={4} mt={3}>
-        {/* Left image */}
-        <Box flex={1} display="flex" justifyContent="center" alignItems="center" sx={{ ml: "-35vh" }} p={2}>
+        <Box
+          flex={1}
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          sx={{ ml: "-35vh" }}
+          p={2}
+        >
           <Image
             src="/img/account.png"
             alt="Account"
@@ -148,8 +156,14 @@ const Login = () => {
           />
         </Box>
 
-        {/* Right form */}
-        <Box flex={1} maxWidth={500} mx="auto" alignSelf="center" mr={{ xs: 2, md: 15 }} sx={{ ml: "-6px" }}>
+        <Box
+          flex={1}
+          maxWidth={500}
+          mx="auto"
+          alignSelf="center"
+          mr={{ xs: 2, md: 15 }}
+          sx={{ ml: "-6px" }}
+        >
           <Typography variant="h5" fontWeight={600} mb={1} fontSize={35}>
             Log in to Exclusive
           </Typography>
@@ -157,61 +171,73 @@ const Login = () => {
             Enter your details below
           </Typography>
 
-          <Stack spacing={2}>
-            {error && <Alert severity="error">{error}</Alert>}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleLogin();
+            }}
+          >
+            <Stack spacing={2}>
+              {error && <Alert severity="error">{error}</Alert>}
 
-            <TextField
-              variant="standard"
-              label="Email or Phone Number"
-              fullWidth
-              value={emailOrPhone}
-              onChange={(e) => setEmailOrPhone(e.target.value)}
-            />
-            <TextField
-              variant="standard"
-              label="Password"
-              type="password"
-              fullWidth
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+              <TextField
+                variant="standard"
+                label="Email or Phone Number"
+                fullWidth
+                value={emailOrPhone}
+                onChange={(e) => setEmailOrPhone(e.target.value)}
+              />
 
-            <Box display="flex" gap={2}>
+              <TextField
+                variant="standard"
+                label="Password"
+                type="password"
+                fullWidth
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+
+              <Box display="flex" gap={2}>
+                <Button
+                  variant="contained"
+                  color="warning"
+                  sx={{ textTransform: "none", flex: 1 }}
+                  type="submit"
+                  disabled={loading}
+                >
+                  {loading ? "Logging in..." : "Log In"}
+                </Button>
+
+                <Link
+                  href="/forgot-password"
+                  sx={{
+                    textTransform: "none",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "end",
+                    gap: 1,
+                    flex: 1,
+                    textDecoration: "none",
+                    color: "warning.main",
+                    "&:hover": {
+                      textDecoration: "underline",
+                      fontStyle: "italic",
+                    },
+                  }}
+                >
+                  Forget Password?
+                </Link>
+              </Box>
+
               <Button
-                variant="contained"
-                color="warning"
-                sx={{ textTransform: "none", flex: 1 }}
-                onClick={handleLogin}
-                disabled={loading}
+                variant="outlined"
+                startIcon={<FcGoogle />}
+                sx={{ textTransform: "none" }}
               >
-                {loading ? "Logging in..." : "Log In"}
+                Log in with Google
               </Button>
-
-              <Link
-                href="/forgot-password"
-                sx={{
-                  textTransform: "none",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "end",
-                  gap: 1,
-                  flex: 1,
-                  textDecoration: "none",
-                  color: "warning.main",
-                  "&:hover": {
-                    textDecoration: "underline",
-                    fontStyle: "italic",
-                  },
-                }}
-              >
-                Forget Password?
-              </Link>
-            </Box>
-
-            <Button variant="outlined" startIcon={<FcGoogle />} sx={{ textTransform: "none" }}>
-              Log in with Google
-            </Button>
-          </Stack>
+            </Stack>
+          </form>
         </Box>
       </Box>
     </Box>

@@ -56,7 +56,7 @@ const VerifyOtpPage = () => {
 
     try {
       const response = await axios.post(
-        "http://192.168.1.100:3001/api/authentication/verify-otp",
+        "https://9637-2a09-bac5-d46c-18c8-00-278-42.ngrok-free.app/api/authentication/verify-otp",
         { userId, otp, type },
         { withCredentials: true }
       );
@@ -90,7 +90,7 @@ const VerifyOtpPage = () => {
       setError("Đã vượt quá số lần gửi lại. Tài khoản sẽ bị xoá...");
       try {
         await axios.post(
-          "http://192.168.1.100:3001/api/authentication/stop-verify-otp",
+          "https://9637-2a09-bac5-d46c-18c8-00-278-42.ngrok-free.app/api/authentication/stop-verify-otp",
           { userId },
           { withCredentials: true }
         );
@@ -109,7 +109,7 @@ const VerifyOtpPage = () => {
       };
 
       const response = await axios.post(
-        "http://192.168.1.100:3001/api/authentication/again-otp",
+        "https://9637-2a09-bac5-d46c-18c8-00-278-42.ngrok-free.app/api/authentication/again-otp",
         payload,
         { withCredentials: true }
       );
@@ -138,7 +138,7 @@ const VerifyOtpPage = () => {
     if (!userId) return;
     try {
       await axios.post(
-        "http://192.168.1.100:3001/api/authentication/stop-verify-otp",
+        "https://9637-2a09-bac5-d46c-18c8-00-278-42.ngrok-free.app/api/authentication/stop-verify-otp",
         { userId },
         { withCredentials: true }
       );

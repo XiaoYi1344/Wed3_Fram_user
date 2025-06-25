@@ -100,7 +100,7 @@ const AddressBook = () => {
           <MuiLink underline="hover" color="inherit" href="/">
             Home
           </MuiLink>
-          <Link href="/account/profile" passHref>
+          <Link href="/account/profile" passHref legacyBehavior>
             <MuiLink underline="hover" color="inherit">
               My Account
             </MuiLink>

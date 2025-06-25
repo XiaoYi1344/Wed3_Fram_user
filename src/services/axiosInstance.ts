@@ -1,3 +1,4 @@
+// src/services/axiosInstance.ts
 import axios, {
   AxiosError,
   InternalAxiosRequestConfig,
@@ -11,7 +12,7 @@ import {
 } from "../utils/auth";
 
 const api = axios.create({
-  baseURL: "https://your-api.com/api",
+  baseURL: "https://c6d4-2a09-bac5-d468-25af-00-3c1-1c.ngrok-free.app/api", // ⚠️ Đổi lại URL đúng
 });
 
 let isRefreshing = false;
@@ -31,7 +32,6 @@ const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue = [];
 };
 
-// ✅ Use `InternalAxiosRequestConfig`
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = getAccessToken();
@@ -43,7 +43,6 @@ api.interceptors.request.use(
   (error: AxiosError) => Promise.reject(error)
 );
 
-// Handle token refresh
 api.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error: AxiosError & { config: InternalAxiosRequestConfig & { _retry?: boolean } }) => {
@@ -68,17 +67,17 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const res = await axios.post("https://your-api.com/api/authentication/refresh-token", {
+        const res = await axios.post("https://c6d4-2a09-bac5-d468-25af-00-3c1-1c.ngrok-free.app/api/authentication/refresh-token", {
           refreshToken: getRefreshToken(),
         });
 
-        const newAccessToken = res.data.accessToken;
-        setTokens(newAccessToken, getRefreshToken()!);
+        const { accessToken, refreshToken } = res.data;
+        setTokens(accessToken, refreshToken);
 
-        api.defaults.headers.common["Authorization"] = `Bearer ${newAccessToken}`;
-        processQueue(null, newAccessToken);
+        api.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+        processQueue(null, accessToken);
 
-        originalRequest.headers.set("Authorization", `Bearer ${newAccessToken}`);
+        originalRequest.headers.set("Authorization", `Bearer ${accessToken}`);
         return api(originalRequest);
       } catch (refreshErr) {
         processQueue(refreshErr, null);

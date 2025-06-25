@@ -14,7 +14,7 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import RemoveRedEyeOutlinedIcon from "@mui/icons-material/RemoveRedEyeOutlined";
 import { AnimatePresence, motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 
 import {
   Carousel,
@@ -34,7 +34,7 @@ const chunkProducts = (arr: ProductType[], size: number) =>
   );
 
 const Product = () => {
-  const navigate = useNavigate();
+   const router = useRouter();
   const [likedProducts, setLikedProducts] = useState<Record<number, boolean>>({});
 
   const toggleLike = (id: number) => {
@@ -42,6 +42,10 @@ const Product = () => {
       ...prev,
       [id]: !prev[id],
     }));
+  };
+
+  const handleClick = (id: number) => {
+    router.push(`/product/${id}`);
   };
 
   const productGroups = chunkProducts(products, 8); // 8 sản phẩm / slide
@@ -146,7 +150,7 @@ const Product = () => {
                       component="img"
                       image={item.image}
                       alt={item.title}
-                      onClick={() => navigate(`/product/${item.id}`)}
+                      onClick={() => handleClick(item.id)}
                       style={{ objectFit: "contain", marginTop: "-10px" }}
                       className="bg-gray-100 py-10 px-4 h-[250px]"
                     />

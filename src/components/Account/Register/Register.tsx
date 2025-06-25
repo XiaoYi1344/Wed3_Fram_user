@@ -114,7 +114,7 @@ const Register = () => {
       setLoading(true);
 
       const response = await axios.post(
-        "http://192.168.1.100:3001/api/authentication/register",
+        "https://9637-2a09-bac5-d46c-18c8-00-278-42.ngrok-free.app/api/authentication/register",
         payload,
         { withCredentials: true }
       );

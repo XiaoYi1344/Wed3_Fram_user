@@ -20,30 +20,64 @@ const Account = () => {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
+
   const router = useRouter();
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const token = localStorage.getItem("accessToken");
-
+        const token =
+          typeof window !== "undefined"
+            ? localStorage.getItem("accessToken")
+            : null;
         console.log("Token:", token);
 
         if (!token) {
-          console.error("Access token không tồn tại");
+          console.error("❌ Access token không tồn tại");
+          router.push("/login");
           return;
         }
 
         const res = await axios.get(
-          "http://192.168.1.100:3001/api/user/get-user",
+          "https://c645-2a09-bac1-7ac0-10-00-2e5-38.ngrok-free.app/api/user/get-user",
           {
             headers: {
               Authorization: `Bearer ${token}`,
+              Accept: "application/json",
+              // "Ngrok-Skip-Browser-Warning": "1", // ✅ Tránh bị trả về HTML
             },
+            maxRedirects: 0,
+            withCredentials: true,
+            validateStatus: () => true, // Đừng tự động throw nếu status >= 400
           }
         );
 
-        const user = res.data.data;
+        console.log("📡 Status:", res.status);
+        console.log("📡 Response URL:", res.request?.responseURL);
+        console.log("📡 Headers:", res.headers);
+
+        const contentType = res.headers["content-type"] || "";
+        if (!contentType.includes("application/json")) {
+          console.error("❌ Phản hồi không phải JSON:", res.data);
+          router.push("/login");
+          return;
+        }
+
+        if (res.status === 200) {
+          console.log("User:", res.data.user);
+        } else if (res.status === 204) {
+          console.warn("⚠️ Không có nội dung trả về từ BE");
+        } else {
+          console.error("❌ Lỗi khác:", res.status);
+        }
+
+        const user = res.data;
+
+        if (!user || typeof user !== "object") {
+          console.error("❌ Dữ liệu người dùng không hợp lệ:", user);
+          router.push("/login");
+          return;
+        }
 
         const fullName = user.fullName || "";
         const [fName, ...rest] = fullName.split(" ");
@@ -52,8 +86,7 @@ const Account = () => {
         setEmail(user.email || "");
         setAddress(user.address || "");
       } catch (error) {
-        console.log("Lỗi nè:", error);
-
+        console.error("❌ Lỗi khi fetch user:", error);
         router.push("/login");
       }
     };
@@ -64,7 +97,6 @@ const Account = () => {
   return (
     <Box bgcolor="#fff" minHeight="100vh" py={25}>
       <Container maxWidth="lg">
-        {/* Breadcrumb */}
         <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 8 }}>
           <MuiLink underline="hover" color="inherit" href="/">
             Home
@@ -72,20 +104,18 @@ const Account = () => {
           <Typography color="text.primary">My Account</Typography>
         </Breadcrumbs>
 
-        {/* Main Layout */}
         <Stack
           direction={{ xs: "column", md: "row" }}
           spacing={4}
           alignItems="flex-start"
           mt={2}
         >
-          {/* Sidebar */}
           <Box width={{ xs: "100%", md: 250 }}>
             <Typography fontWeight="bold" mb={1}>
               Manage My Account
             </Typography>
             <Stack spacing={1} pl={1} mb={3}>
-              <Link href="/account/profile">
+              <Link href="/account/profile" passHref>
                 <Typography
                   color="orange"
                   fontSize={14}
@@ -94,7 +124,7 @@ const Account = () => {
                   My Profile
                 </Typography>
               </Link>
-              <Link href="/account/address-book">
+              <Link href="/account/address-book" passHref>
                 <Typography
                   color="gray"
                   fontSize={14}
@@ -103,7 +133,7 @@ const Account = () => {
                   Address Book
                 </Typography>
               </Link>
-              <Link href="/account/payment-options">
+              <Link href="/account/payment-options" passHref>
                 <Typography
                   color="gray"
                   fontSize={14}
@@ -118,7 +148,7 @@ const Account = () => {
               My Orders
             </Typography>
             <Stack spacing={1} pl={1} mb={3}>
-              <Link href="/account/returns">
+              <Link href="/account/returns" passHref>
                 <Typography
                   color="gray"
                   fontSize={14}
@@ -127,7 +157,7 @@ const Account = () => {
                   My Returns
                 </Typography>
               </Link>
-              <Link href="/account/cancellations">
+              <Link href="/account/cancellations" passHref>
                 <Typography
                   color="gray"
                   fontSize={14}
@@ -138,9 +168,10 @@ const Account = () => {
               </Link>
             </Stack>
 
-            <Typography fontWeight="bold" mb={1}>
-              <Link href="/account/wishlist">
+            <Box mb={1}>
+              <Link href="/account/wishlist" passHref>
                 <Typography
+                  fontWeight="bold"
                   color="gray"
                   fontSize={14}
                   sx={{ cursor: "pointer" }}
@@ -148,10 +179,10 @@ const Account = () => {
                   My Wishlist
                 </Typography>
               </Link>
-            </Typography>
+            </Box>
           </Box>
 
-          {/* Form */}
+          {/* Form Section */}
           <Box
             flex={1}
             p={4}
@@ -164,7 +195,6 @@ const Account = () => {
               Edit Your Profile
             </Typography>
 
-            {/* Name fields */}
             <Stack direction={{ xs: "column", md: "row" }} spacing={2} mb={2}>
               <Stack direction="column" width="50%">
                 <Typography fontWeight={600} mb={1}>
@@ -194,7 +224,6 @@ const Account = () => {
               </Stack>
             </Stack>
 
-            {/* Email & Address */}
             <Stack direction={{ xs: "column", md: "row" }} spacing={2} mb={4}>
               <Stack direction="column" width="50%">
                 <Typography fontWeight={600} mb={1}>
@@ -224,7 +253,6 @@ const Account = () => {
               </Stack>
             </Stack>
 
-            {/* Password Section */}
             <Typography fontWeight={600} mb={1}>
               Password Changes
             </Typography>
@@ -246,7 +274,6 @@ const Account = () => {
               />
             </Stack>
 
-            {/* Buttons */}
             <Box display="flex" justifyContent="flex-end" gap={2} mt={4}>
               <Button variant="text">Cancel</Button>
               <Button
