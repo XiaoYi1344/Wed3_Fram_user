@@ -15,25 +15,26 @@ const AnimatedDigitCounter: React.FC<AnimatedDigitCounterProps> = ({
   duration = 0.4,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [prevValue, setPrevValue] = useState(value);
+  // const [prevValue, setPrevValue] = useState(value);
+  const [prevValue, setPrevValue] = useState(0);
 
   useEffect(() => {
-    if (containerRef.current) {
-      const startY = -prevValue * DIGIT_HEIGHT;
-      const endY = -value * DIGIT_HEIGHT;
+  if (containerRef.current) {
+    const startY = -prevValue * DIGIT_HEIGHT;
+    const endY = -value * DIGIT_HEIGHT;
 
-      animate(startY, endY, {
-        duration,
-        onUpdate: (latest) => {
-          if (containerRef.current) {
-            containerRef.current.style.transform = `translateY(${latest}px)`;
-          }
-        },
-      });
+    animate(startY, endY, {
+      duration,
+      onUpdate: (latest) => {
+        if (containerRef.current) {
+          containerRef.current.style.transform = `translateY(${latest}px)`;
+        }
+      },
+    });
 
-      setPrevValue(value);
-    }
-  }, [value, duration]);
+    setPrevValue(value);
+  }
+}, [value, duration, prevValue]); // ✅ thêm prevValue
 
   return (
     <div

@@ -5,9 +5,9 @@ import AnimatedNumberRolling from "../../AnimatedNumberRolling";
 import { Box, Typography } from "@mui/material";
 
 interface SaleDay {
-  date: string;       // "YYYY-MM-DD"
-  startTime: string;  // "HH:mm:ss"
-  endTime: string;    // "HH:mm:ss"
+  date: string; // "YYYY-MM-DD"
+  startTime: string; // "HH:mm:ss"
+  endTime: string; // "HH:mm:ss"
 }
 
 interface Countdown {
@@ -35,9 +35,8 @@ const calculateCountdown = (target: Date | null): Countdown => {
 };
 
 const SmartCountdownSale: React.FC<Props> = ({ saleDays }) => {
-  const now = new Date();
-
   const { label, target } = useMemo(() => {
+    const now = new Date(); // moved inside useMemo
     const nowTime = now.getTime();
 
     for (const sale of saleDays) {
@@ -54,7 +53,7 @@ const SmartCountdownSale: React.FC<Props> = ({ saleDays }) => {
     }
 
     return { label: "", target: null };
-  }, [saleDays]);
+  }, [saleDays]); // ✅ removed 'now' from deps
 
   const [countdown, setCountdown] = useState<Countdown>(() =>
     calculateCountdown(target)
