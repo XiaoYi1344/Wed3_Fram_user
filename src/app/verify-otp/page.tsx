@@ -1,10 +1,13 @@
+"use client";
+
+
+import { Suspense } from 'react';
 import VerifyOtpPage from '@/components/VerifyOTP/VerifyOTP'
-import React from 'react'
 
-const page = () => {
+export default function Page() {
   return (
-    <VerifyOtpPage />
-  )
+    <Suspense fallback={<div>Loading...</div>}>
+      <VerifyOtpPage />
+    </Suspense>
+  );
 }
-
-export default page
