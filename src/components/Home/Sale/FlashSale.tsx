@@ -26,6 +26,7 @@ import {
 import SmartCountdownSale from "./SmartCountdownSale";
 import { productSales } from "@/data";
 import { saleDays } from "@/data";
+import { useCart } from "@/hook/useCart";
 
 // const saleDays = [
 //   {
@@ -157,6 +158,17 @@ const FlashSales = () => {
     }));
   };
 
+  const { addItem } = useCart();
+  const handleAddToCart = (item: (typeof productSales)[0]) => {
+    addItem({
+      id: item.id,
+      title: item.title,
+      image: item.image,
+      price: item.newPrice,
+      quantity: 1,
+    });
+  };
+
   // const next = getNextFlashSale();
 
   return (
@@ -236,7 +248,7 @@ const FlashSales = () => {
                     position="absolute"
                     right={0}
                     top="12vh"
-                    sx={{zIndex: 1,}}
+                    sx={{ zIndex: 1 }}
                   >
                     <Button
                       onClick={() => toggleLike(item.id)}
@@ -294,7 +306,7 @@ const FlashSales = () => {
                   </Box>
                 </Box>
 
-{/* Nút thêm giỏ hàng */}
+                {/* Nút thêm giỏ hàng */}
                 <Box
                   sx={{
                     width: "100%",
@@ -349,10 +361,7 @@ const FlashSales = () => {
                       borderBottomLeftRadius: "30px",
                       borderBottomRightRadius: "30px",
                     }}
-                    onClick={() => {
-                      // TODO: xử lý thêm vào giỏ hàng tại đây
-                      console.log(`Thêm ${item.id} vào giỏ hàng`);
-                    }}
+                    onClick={() => handleAddToCart(item)}
                   >
                     Thêm vào giỏ hàng
                   </Box>

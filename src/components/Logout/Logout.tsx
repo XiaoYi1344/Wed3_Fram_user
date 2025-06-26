@@ -9,14 +9,10 @@ import { Loader2 } from "lucide-react";
 import { jwtDecode } from "jwt-decode";
 
 interface LogoutButtonProps {
-  refreshToken: string;
   onLoggedOut?: () => void;
 }
 
-const LogoutButton: React.FC<LogoutButtonProps> = ({
-  refreshToken,
-  onLoggedOut,
-}) => {
+const LogoutButton: React.FC<LogoutButtonProps> = ({ onLoggedOut }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -28,15 +24,17 @@ const LogoutButton: React.FC<LogoutButtonProps> = ({
     setSuccessMessage(null);
 
     const accessToken = localStorage.getItem("accessToken");
+    const refreshToken = localStorage.getItem("refreshToken");
 
-    // Trường hợp thiếu token
+    console.log("accessToken:", accessToken);
+    console.log("refreshToken:", refreshToken);
+
     if (!accessToken || !refreshToken) {
       clearTokensAndRedirect("Thiếu accessToken hoặc refreshToken. Vui lòng đăng nhập lại.");
       return;
     }
 
     try {
-      // Kiểm tra hạn token
       const decoded: { exp?: number } = jwtDecode(accessToken);
       const isExpired = !decoded.exp || decoded.exp * 1000 < Date.now();
 
@@ -45,9 +43,8 @@ const LogoutButton: React.FC<LogoutButtonProps> = ({
         return;
       }
 
-      // Gọi API logout
       const response = await axios.post(
-        "https://f699-2a09-bac1-7aa0-10-00-277-43.ngrok-free.app/api/authentication/log-out",
+        "https://42da-2a09-bac1-7ac0-10-00-2e4-a0.ngrok-free.app/api/authentication/log-out",
         { refreshToken },
         {
           headers: {
@@ -56,10 +53,7 @@ const LogoutButton: React.FC<LogoutButtonProps> = ({
           },
         }
       );
-      console.log("AccessToken: ", accessToken);
-      console.log("RefreshToken: ", refreshToken);
 
-      // Nếu logout thành công
       if (response.data?.success) {
         setSuccessMessage("Đăng xuất thành công.");
         clearTokensAndRedirect();
@@ -68,23 +62,18 @@ const LogoutButton: React.FC<LogoutButtonProps> = ({
       }
     } catch (err) {
       const axiosErr = err as AxiosError<{ message?: string }>;
+      const message =
+        axiosErr.response?.data?.message || axiosErr.message || "Lỗi không xác định.";
 
-      // Nếu lỗi liên quan đến token => clear luôn
       const isTokenError =
-        axiosErr.message.includes("jwt") ||
-        axiosErr.message.includes("token") ||
-        axiosErr.response?.data?.message?.toLowerCase().includes("token");
+        message.toLowerCase().includes("token") || message.toLowerCase().includes("jwt");
 
       if (isTokenError) {
         clearTokensAndRedirect("Token không hợp lệ hoặc đã hết hạn.");
         return;
       }
 
-      // Lỗi khác
-      setError(
-        axiosErr.response?.data?.message ||
-          "Lỗi không xác định. Vui lòng thử lại sau."
-      );
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -103,10 +92,9 @@ const LogoutButton: React.FC<LogoutButtonProps> = ({
 
     if (onLoggedOut) onLoggedOut();
 
-    // Redirect sau một chút để UI có thời gian cập nhật
     setTimeout(() => {
       router.push("/login");
-    }, 100);
+    }, 300); // Tăng nhẹ thời gian để UI kịp hiển thị thông báo
   };
 
   return (

@@ -20,79 +20,114 @@ const Account = () => {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
+  const [accessToken, setAccessToken] = useState("");
 
   const router = useRouter();
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const token =
-          typeof window !== "undefined"
-            ? localStorage.getItem("accessToken")
-            : null;
-        console.log("Token:", token);
+        const accessTokenLocal = localStorage.getItem("accessToken");
+        const refreshTokenLocal = localStorage.getItem("refreshToken");
 
-        if (!token) {
-          console.error("❌ Access token không tồn tại");
+        console.log("📦 [Token] accessToken:", accessTokenLocal);
+        console.log("📦 [Token] refreshToken:", refreshTokenLocal);
+
+        if (!accessTokenLocal || !refreshTokenLocal) {
+          console.warn("❌ Không tìm thấy token, chuyển hướng login...");
           router.push("/login");
           return;
         }
+
+        setAccessToken(accessTokenLocal);
 
         const res = await axios.get(
-          "https://f699-2a09-bac1-7aa0-10-00-277-43.ngrok-free.app/api/user/get-user",
+          "https://42da-2a09-bac1-7ac0-10-00-2e4-a0.ngrok-free.app/api/user/get-user",
           {
             headers: {
-              Authorization: `Bearer ${token}`,
-       
-              // "Ngrok-Skip-Browser-Warning": "1", // ✅ Tránh bị trả về HTML
+              Authorization: `Bearer ${accessTokenLocal}`,
+              // Accept: "application/json",
             },
-            // maxRedirects: 0,
             withCredentials: true,
-            // validateStatus: () => true, // Đừng tự động throw nếu status >= 400
+            // params: {
+            //   refreshToken: refreshTokenLocal,
+            // },
           }
         );
+        console.log("👉 Authorization header:", res.headers.authorization);
 
-        console.log("📡 Status:", res.status);
-        console.log("📡 Response URL:", res.request?.responseURL);
-        console.log("📡 Headers:", res.headers);
+        console.log("✅ [RESPONSE] Server trả về:", res);
 
-        const contentType = res.headers["content-type"] || "";
-        if (!contentType.includes("application/json")) {
-          console.error("❌ Phản hồi không phải JSON:", res.data);
-          router.push("/login");
+        const user = res?.data?.user;
+        console.log("📦 [USER DATA] Dữ liệu user:", user);
+
+        if (!user) {
+          console.warn("⚠️ Không có dữ liệu user trả về.");
           return;
         }
 
-        if (res.status === 200) {
-          console.log("User:", res.data.user);
-        } else if (res.status === 204) {
-          console.warn("⚠️ Không có nội dung trả về từ BE");
-        } else {
-          console.error("❌ Lỗi khác:", res.status);
-        }
-
-        const user = res.data;
-
-        if (!user || typeof user !== "object") {
-          console.error("❌ Dữ liệu người dùng không hợp lệ:", user);
-          router.push("/login");
-          return;
-        }
-
-        const fullName = user.fullName || "";
-        const [fName, ...rest] = fullName.split(" ");
-        setFirstName(fName);
-        setLastName(rest.join(" "));
+        const parts = user.fullName?.trim()?.split(" ") || [];
+        setFirstName(parts[0] || "");
+        setLastName(parts.slice(1).join(" ") || "");
         setEmail(user.email || "");
         setAddress(user.address || "");
       } catch (error) {
-        console.error("❌ Lỗi khi fetch user:", error);
+        console.error("❌ [ERROR] Lỗi khi fetch user:", error);
+
+        if (axios.isAxiosError(error)) {
+          console.error(
+            "🔴 [AXIOS ERROR] Lỗi từ server:",
+            error.response?.data
+          );
+          console.error("🔴 [STATUS]", error.response?.status);
+        } else {
+          console.error("🔴 [UNKNOWN ERROR]", error);
+        }
+
         router.push("/login");
       }
     };
 
-    fetchUser();
+    console.log("🔍 useEffect chạy lần đầu...");
+    if (typeof window !== "undefined") {
+      console.log("🧠 Đang trong môi trường browser, gọi fetchUser...");
+      fetchUser();
+    } else {
+      console.warn("🚨 useEffect không chạy trong trình duyệt.");
+    }
   }, [router]);
+
+  const handleSave = async () => {
+    try {
+      if (!firstName.trim() || !lastName.trim()) {
+        alert("❗ Vui lòng nhập đầy đủ họ và tên.");
+        return;
+      }
+
+      const res = await axios.put(
+        "https://de20-2a09-bac1-7aa0-10-00-23-473.ngrok-free.app/api/user/update-user",
+        {
+          fullName: `${firstName} ${lastName}`,
+          address,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          withCredentials: true,
+        }
+      );
+
+      if (res.status === 200) {
+        alert("✅ Cập nhật hồ sơ thành công!");
+      } else {
+        alert("❌ Không thể cập nhật. Vui lòng thử lại.");
+      }
+    } catch (error) {
+      console.error("❌ Error updating user:", error);
+      alert("❌ Có lỗi xảy ra khi cập nhật.");
+    }
+  };
 
   return (
     <Box bgcolor="#fff" minHeight="100vh" py={25}>
@@ -110,6 +145,7 @@ const Account = () => {
           alignItems="flex-start"
           mt={2}
         >
+          {/* Sidebar */}
           <Box width={{ xs: "100%", md: 250 }}>
             <Typography fontWeight="bold" mb={1}>
               Manage My Account
@@ -182,7 +218,7 @@ const Account = () => {
             </Box>
           </Box>
 
-          {/* Form Section */}
+          {/* Form */}
           <Box
             flex={1}
             p={4}
@@ -253,31 +289,11 @@ const Account = () => {
               </Stack>
             </Stack>
 
-            <Typography fontWeight={600} mb={1}>
-              Password Changes
-            </Typography>
-            <Stack spacing={2}>
-              <TextField
-                placeholder="Current Password"
-                fullWidth
-                InputProps={{ sx: { bgcolor: "#f5f5f5", borderRadius: "6px" } }}
-              />
-              <TextField
-                placeholder="New Password"
-                fullWidth
-                InputProps={{ sx: { bgcolor: "#f5f5f5", borderRadius: "6px" } }}
-              />
-              <TextField
-                placeholder="Confirm New Password"
-                fullWidth
-                InputProps={{ sx: { bgcolor: "#f5f5f5", borderRadius: "6px" } }}
-              />
-            </Stack>
-
             <Box display="flex" justifyContent="flex-end" gap={2} mt={4}>
               <Button variant="text">Cancel</Button>
               <Button
                 variant="contained"
+                onClick={handleSave}
                 sx={{
                   bgcolor: "#ff8d2f",
                   color: "#fff",

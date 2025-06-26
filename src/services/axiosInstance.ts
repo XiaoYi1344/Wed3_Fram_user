@@ -12,7 +12,7 @@ import {
 } from "../utils/auth";
 
 const api = axios.create({
-  baseURL: "https://c6d4-2a09-bac5-d468-25af-00-3c1-1c.ngrok-free.app/api", // ⚠️ Đổi lại URL đúng
+  baseURL: "https://ee73-2a09-bac5-d46c-15f-00-23-47b.ngrok-free.app/api", // ⚠️ Đổi lại URL đúng
 });
 
 let isRefreshing = false;
@@ -67,7 +67,7 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const res = await axios.post("https://c6d4-2a09-bac5-d468-25af-00-3c1-1c.ngrok-free.app/api/authentication/refresh-token", {
+        const res = await axios.post("https://ee73-2a09-bac5-d46c-15f-00-23-47b.ngrok-free.app/api/authentication/refresh-token", {
           refreshToken: getRefreshToken(),
         });
 

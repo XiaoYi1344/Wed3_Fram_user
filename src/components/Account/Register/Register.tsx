@@ -108,7 +108,7 @@ const Register: React.FC<RegisterProps> = ({ onSuccess }) => {
       setLoading(true);
 
       const response = await axios.post(
-        "https://f699-2a09-bac1-7aa0-10-00-277-43.ngrok-free.app/api/authentication/register",
+        "https://de20-2a09-bac1-7aa0-10-00-23-473.ngrok-free.app/api/authentication/register",
         payload,
         { withCredentials: true }
       );

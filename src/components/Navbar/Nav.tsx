@@ -31,6 +31,7 @@ import { IoIosArrowDown } from "react-icons/io";
 
 import { Button } from "@/components/ui/button";
 import { navLinks } from "@/constant/constant";
+import { useCart } from "@/hook/useCart";
 
 type Props = {
   openNav: () => void;
@@ -46,6 +47,8 @@ const Nav = ({ openNav }: Props) => {
   const open = Boolean(anchorEl);
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const { totalQuantity } = useCart();
 
   // Change navbar background on scroll
   useEffect(() => {
@@ -69,15 +72,14 @@ const Nav = ({ openNav }: Props) => {
   }, [open]);
 
   useEffect(() => {
-  const accessToken =
-    typeof window !== "undefined"
-      ? localStorage.getItem("accessToken")
-      : null;
+    const accessToken =
+      typeof window !== "undefined"
+        ? localStorage.getItem("accessToken")
+        : null;
 
-  // console.log("Token:", accessToken); // 👉 xem token có thật không
-  setIsLoggedIn(!!accessToken);
-}, []);
-
+    // console.log("Token:", accessToken); // 👉 xem token có thật không
+    setIsLoggedIn(!!accessToken);
+  }, []);
 
   const handleLanguageChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     setLanguage(e.target.value);
@@ -208,10 +210,14 @@ const Nav = ({ openNav }: Props) => {
             >
               <FiHeart className="w-5 h-5" />
             </Button>
-            <Button variant="ghost" size="icon" className="relative">
-              <FiShoppingCart className="w-6 h-6" />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative"
+              onClick={() => router.push("/cart")}
+            >
               <Badge
-                badgeContent={2}
+                badgeContent={totalQuantity}
                 color="warning"
                 sx={{
                   position: "absolute",
@@ -223,7 +229,9 @@ const Nav = ({ openNav }: Props) => {
                     minWidth: 16,
                   },
                 }}
-              />
+              >
+                <FiShoppingCart className="w-6 h-6" />
+              </Badge>
             </Button>
             {isLoggedIn && (
               <IconButton

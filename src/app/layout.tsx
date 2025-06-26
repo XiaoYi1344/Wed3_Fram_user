@@ -1,8 +1,9 @@
+// app/layout.tsx
 import type { Metadata } from "next";
 import "./globals.css";
 import ResponsiveNav from "@/components/Navbar/ResponsiveNav";
 import Footer from "@/components/Footer/Footer";
-
+import { CartProvider } from "@/context/CartContext"; // ✅ Import CartProvider
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -17,9 +18,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <ResponsiveNav />
-        {children}
-        <Footer />
+        <CartProvider> {/* ✅ Wrap everything inside CartProvider */}
+          <ResponsiveNav />
+          {children}
+          <Footer />
+        </CartProvider>
       </body>
     </html>
   );

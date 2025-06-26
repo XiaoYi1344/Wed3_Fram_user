@@ -69,7 +69,7 @@ const Login = () => {
       const payload = { email: emailOrPhone, password };
 
       const { data } = await axios.post<LoginResponse>(
-        "https://f699-2a09-bac1-7aa0-10-00-277-43.ngrok-free.app/api/authentication/login",
+        "https://42da-2a09-bac1-7ac0-10-00-2e4-a0.ngrok-free.app/api/authentication/login",
         payload,
         { signal: controller.signal, withCredentials: true }
       );
