@@ -6,7 +6,6 @@ import Banner from '../Banner/Banner'
 
 const MainLayout: React.FC = () => {
   return (
-
     // <Grid container p={3} rowSpacing={1} spacing={2} sx={{ height: '100%' }}>
     //   <Grid size={{ xs: 12, md: 6, lg: 3 }} p={3}>
     //     <Grid><SidebarMenu /></Grid>

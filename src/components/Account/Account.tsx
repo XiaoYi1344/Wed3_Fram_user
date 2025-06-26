@@ -151,7 +151,7 @@ const Account = () => {
               Manage My Account
             </Typography>
             <Stack spacing={1} pl={1} mb={3}>
-              <Link href="/account/profile" passHref>
+              <Link href="/account/profile" passHref legacyBehavior>
                 <Typography
                   color="orange"
                   fontSize={14}
@@ -160,7 +160,7 @@ const Account = () => {
                   My Profile
                 </Typography>
               </Link>
-              <Link href="/account/address-book" passHref>
+              <Link href="/account/address-book" passHref legacyBehavior>
                 <Typography
                   color="gray"
                   fontSize={14}
@@ -169,7 +169,7 @@ const Account = () => {
                   Address Book
                 </Typography>
               </Link>
-              <Link href="/account/payment-options" passHref>
+              <Link href="/account/payment-options" passHref legacyBehavior>
                 <Typography
                   color="gray"
                   fontSize={14}
@@ -184,7 +184,7 @@ const Account = () => {
               My Orders
             </Typography>
             <Stack spacing={1} pl={1} mb={3}>
-              <Link href="/account/returns" passHref>
+              <Link href="/account/returns" passHref legacyBehavior>
                 <Typography
                   color="gray"
                   fontSize={14}
@@ -193,7 +193,7 @@ const Account = () => {
                   My Returns
                 </Typography>
               </Link>
-              <Link href="/account/cancellations" passHref>
+              <Link href="/account/cancellations" passHref legacyBehavior>
                 <Typography
                   color="gray"
                   fontSize={14}
@@ -205,7 +205,7 @@ const Account = () => {
             </Stack>
 
             <Box mb={1}>
-              <Link href="/account/wishlist" passHref>
+              <Link href="/account/wishlist" passHref legacyBehavior>
                 <Typography
                   fontWeight="bold"
                   color="gray"
