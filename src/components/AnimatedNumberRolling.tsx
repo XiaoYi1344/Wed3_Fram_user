@@ -2,6 +2,7 @@
 
 import React from "react";
 import AnimatedDigitCounter from "./AnimatedDigitCounter";
+import { Box } from "@mui/material";
 
 interface AnimatedNumberRollingProps {
   number: number;
@@ -19,11 +20,13 @@ const AnimatedNumberRolling: React.FC<AnimatedNumberRollingProps> = ({
   const digits = padNumber(number, 2).split("").map(Number); // 2 chữ số: 00 → 99
 
   return (
-    <div style={{ display: "flex", gap: 4 }}>
-      {digits.map((digit, idx) => (
-        <AnimatedDigitCounter key={idx} value={digit} duration={duration} />
-      ))}
-    </div>
+    <Box>
+      <div style={{ display: "flex", gap: 4 }}>
+        {digits.map((digit, idx) => (
+          <AnimatedDigitCounter key={idx} value={digit} duration={duration} />
+        ))}
+      </div>
+    </Box>
   );
 };
 

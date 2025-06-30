@@ -18,6 +18,8 @@ const LogoutButton: React.FC<LogoutButtonProps> = ({ onLoggedOut }) => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const router = useRouter();
 
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+
   const handleLogout = async () => {
     setLoading(true);
     setError(null);
@@ -44,7 +46,7 @@ const LogoutButton: React.FC<LogoutButtonProps> = ({ onLoggedOut }) => {
       }
 
       const response = await axios.post(
-        "https://42da-2a09-bac1-7ac0-10-00-2e4-a0.ngrok-free.app/api/authentication/log-out",
+        `${baseUrl}/api/authentication/log-out`,
         { refreshToken },
         {
           headers: {

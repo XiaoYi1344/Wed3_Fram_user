@@ -1,82 +1,103 @@
+// src/context/CartContext.tsx
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 
+// Define type for each cart item
 export type CartItem = {
   id: number;
-  title: string;
-  image: string;
+  name: string;
   price: number;
   quantity: number;
+  image: string;
 };
 
+// Define the context shape
 type CartContextType = {
-  items: CartItem[];
+  cartItems: CartItem[];
   addItem: (item: CartItem) => void;
-  updateQuantity: (id: number, quantity: number) => void;
+  updateQuantity: (id: number, qty: number) => void;
   removeItem: (id: number) => void;
   clearCart: () => void;
   subtotal: number;
-  totalQuantity: number;
 };
 
+// Create the context
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-const CART_STORAGE_KEY = "my-cart";
-
+// Provider component to wrap app/pages
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
-  const [items, setItems] = useState<CartItem[]>([]);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
-  // Load từ localStorage
+  // Load cart from localStorage when component mounts
   useEffect(() => {
-    const stored = localStorage.getItem(CART_STORAGE_KEY);
-    if (stored) setItems(JSON.parse(stored));
+    const storedCart = localStorage.getItem("cart");
+    if (storedCart) {
+      setCartItems(JSON.parse(storedCart));
+    }
   }, []);
 
-  // Sync lên localStorage
+  // Save cart to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
-  }, [items]);
+    localStorage.setItem("cart", JSON.stringify(cartItems));
+  }, [cartItems]);
 
+  // Add item to cart
   const addItem = (item: CartItem) => {
-    setItems((prev) => {
-      const existing = prev.find((i) => i.id === item.id);
-      if (existing) {
-        return prev.map((i) =>
-          i.id === item.id ? { ...i, quantity: i.quantity + item.quantity } : i
-        );
-      }
-      return [...prev, item];
-    });
+    const exists = cartItems.find((i) => i.id === item.id);
+    if (exists) {
+      setCartItems((prev) =>
+        prev.map((i) =>
+          i.id === item.id
+            ? { ...i, quantity: i.quantity + item.quantity }
+            : i
+        )
+      );
+    } else {
+      setCartItems((prev) => [...prev, item]);
+    }
   };
 
-  const updateQuantity = (id: number, quantity: number) => {
-    setItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, quantity } : item))
+  // Update quantity of item in cart
+  const updateQuantity = (id: number, qty: number) => {
+    setCartItems((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, quantity: qty } : item
+      )
     );
   };
 
+  // Remove item from cart
   const removeItem = (id: number) => {
-    setItems((prev) => prev.filter((item) => item.id !== id));
+    setCartItems((prev) => prev.filter((item) => item.id !== id));
   };
 
-  const clearCart = () => setItems([]);
+  // Clear all items
+  const clearCart = () => setCartItems([]);
 
-  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-
-  const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
+  // Calculate subtotal
+  const subtotal = cartItems.reduce(
+    (acc, item) => acc + item.price * item.quantity,
+    0
+  );
 
   return (
     <CartContext.Provider
-      value={{ items, addItem, updateQuantity, removeItem, clearCart, subtotal, totalQuantity }}
+      value={{ cartItems, addItem, updateQuantity, removeItem, clearCart, subtotal }}
     >
       {children}
     </CartContext.Provider>
   );
 };
 
-export const useCartContext = () => {
+// Hook to use cart in components
+export const useCart = () => {
   const context = useContext(CartContext);
-  if (!context) throw new Error("useCartContext must be used inside CartProvider");
+  if (!context) {
+    throw new Error("useCart must be used within a CartProvider");
+  }
   return context;
 };
+
+// Optional: alias for alternative name
+export { useCart as useCartContext };

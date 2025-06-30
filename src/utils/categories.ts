@@ -1,0 +1,44 @@
+export const categories = [
+  {
+    label: "Trái cây ôn đới",
+    path: "/temperate",
+    children: [
+      "Táo", "Lê", "Nho", "Dâu tây", "Việt quất", "Mâm xôi",
+      "Dâu đen", "Mơ", "Mận", "Anh đào", "Kiwi", "Hồng", "Lựu",
+    ],
+  },
+  {
+    label: "Trái cây nhiệt đới",
+    path: "/tropical",
+    children: [
+      "Chuối", "Xoài", "Mít", "Dứa", "Đu đủ", "Dừa", "Sầu riêng",
+      "Chôm chôm", "Măng cụt", "Vú sữa", "Sapôchê", "Na", "Mãng cầu xiêm",
+      "Ổi", "Roi", "Me", "Cam sành", "Bơ", "Khế", "Chay", "Sơ ri",
+      "Nhãn", "Vải", "Quất",
+    ],
+  },
+  {
+    label: "Trái cây có múi",
+    path: "/citrus",
+    children: [
+      "Cam", "Quýt", "Bưởi", "Chanh vàng", "Chanh xanh",
+      "Tắc", "Cam canh", "Cam xoàn", "Cam sành",
+    ],
+  },
+  {
+    label: "Trái cây mọc nước",
+    path: "/juicy",
+    children: [
+      "Dưa hấu", "Thanh long ruỗt trắng", "Thanh long ruỗt đỏ",
+      "Dưa lưới", "Dưa gang", "Dưa chuột", "Cà chua",
+    ],
+  },
+  {
+    label: "Đặc sản vùng miền",
+    path: "/specialty",
+    children: [
+      "Cóc", "Lòng bong", "Thốt nốt", "Chùm ruột", "Táo ta",
+      "Bình bát", "Dâu da", "Trám", "Sấu", "Mắc ca", "Hồng quân", "Lêkima",
+    ],
+  },
+];

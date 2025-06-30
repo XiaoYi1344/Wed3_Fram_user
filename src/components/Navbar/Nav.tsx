@@ -1,25 +1,29 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+  // useMemo,
+  // useTransition,
+} from "react";
+
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-
 import {
+  Stack,
   TextField,
-  InputAdornment,
-  IconButton as MUIIconButton,
   MenuItem,
-  Badge,
-  Fade,
   Menu,
+  Fade,
   ListItemIcon,
   Typography,
+  Badge,
+  InputAdornment,
+  IconButton as MUIIconButton,
   IconButton,
 } from "@mui/material";
-
-import { FiSearch, FiHeart, FiShoppingCart } from "react-icons/fi";
-import { HiBars3BottomRight } from "react-icons/hi2";
-import { GoPerson } from "react-icons/go";
 import {
   FaRegUser,
   FaShoppingBag,
@@ -27,97 +31,86 @@ import {
   FaStar,
   FaSignOutAlt,
 } from "react-icons/fa";
+import {
+  FiSearch,
+  FiHeart,
+  FiShoppingCart,
+} from "react-icons/fi";
+import { HiBars3BottomRight } from "react-icons/hi2";
+import { GoPerson } from "react-icons/go";
 import { IoIosArrowDown } from "react-icons/io";
 
 import { Button } from "@/components/ui/button";
 import { navLinks } from "@/constant/constant";
-import { useCart } from "@/hook/useCart";
+// import { useCart } from "@/hook/useCart";
+
+const menuItems = [
+  { icon: <FaRegUser />, label: "Manage My Account", href: "/account/profile" },
+  { icon: <FaShoppingBag />, label: "My Order", href: "/orders" },
+  { icon: <FaTimesCircle />, label: "My Cancellations", href: "/cancellations" },
+  { icon: <FaStar />, label: "My Reviews", href: "/reviews" },
+  { icon: <FaSignOutAlt />, label: "Logout", href: "/logout" },
+];
 
 type Props = {
   openNav: () => void;
 };
 
+
+const useNavEffect = (
+  setNavBg: (v: boolean) => void,
+  closeMenu: () => void,
+  menuOpen: boolean
+) => {
+  const menuOpenRef = useRef(menuOpen);
+  menuOpenRef.current = menuOpen;
+
+  useEffect(() => {
+    const onScroll = () => {
+      setNavBg(window.scrollY >= 90);
+      if (menuOpenRef.current) closeMenu();
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [closeMenu, setNavBg]);
+};
+
+
 const Nav = ({ openNav }: Props) => {
-  const router = useRouter();
   const pathname = usePathname();
+  const router = useRouter();
   const [navBg, setNavBg] = useState(false);
   const [language, setLanguage] = useState("EN");
-
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
-
+  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // const { totalQuantity } = useCart();
 
-  const { totalQuantity } = useCart();
+  const menuOpen = Boolean(menuAnchor);
+  const closeMenu = useCallback(() => setMenuAnchor(null), []);
+  const openMenu = (e: React.MouseEvent<HTMLElement>) => setMenuAnchor(e.currentTarget);
 
-  // Change navbar background on scroll
+  useNavEffect(setNavBg, closeMenu, menuOpen);
+
   useEffect(() => {
-    const handleScroll = () => {
-      setNavBg(window.scrollY >= 90);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    const token = typeof window !== "undefined" && localStorage.getItem("accessToken");
+    setIsLoggedIn(!!token);
   }, []);
 
-  // Auto-close Menu on scroll
-  useEffect(() => {
-    if (!open) return;
-
-    const handleScroll = () => {
-      handleClose();
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [open]);
-
-  useEffect(() => {
-    const accessToken =
-      typeof window !== "undefined"
-        ? localStorage.getItem("accessToken")
-        : null;
-
-    // console.log("Token:", accessToken); // 👉 xem token có thật không
-    setIsLoggedIn(!!accessToken);
-  }, []);
-
-  const handleLanguageChange = (e: React.ChangeEvent<HTMLInputElement>) =>
+  const handleLanguageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLanguage(e.target.value);
-
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
   };
 
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  const menuItems = [
-    {
-      icon: <FaRegUser />,
-      label: "Manage My Account",
-      href: "/account/profile",
-    },
-    { icon: <FaShoppingBag />, label: "My Order", href: "/orders" },
-    {
-      icon: <FaTimesCircle />,
-      label: "My Cancellations",
-      href: "/cancellations",
-    },
-    { icon: <FaStar />, label: "My Reviews", href: "/reviews" },
-    { icon: <FaSignOutAlt />, label: "Logout", href: "/logout" },
-  ];
+  const goTo = (url: string) => router.push(url);
 
   return (
-    <div className="w-full fixed top-0 z-[1000] border-b border-[#ccc]">
-      {/* Top Bar */}
+    <Stack className="fixed top-0 z-[1000] w-full border-b border-[#ccc]">
+      {/* Top bar */}
       <div className="bg-black text-white text-sm py-2">
         <div className="w-[90%] xl:w-[80%] mx-auto flex justify-between items-center">
           <p className="text-center flex-1">
-            Summer Sale For All Swim Suits And Free Express Delivery – OFF 50%!{" "}
-            <a href="#" className="font-bold underline ml-1">
-              ShopNow
-            </a>
+            Summer Sale For All Swim Suits – OFF 50%!
+            <a href="#" className="font-bold underline ml-1">ShopNow</a>
           </p>
           <TextField
             select
@@ -127,18 +120,11 @@ const Nav = ({ openNav }: Props) => {
             SelectProps={{ IconComponent: IoIosArrowDown }}
             InputProps={{ disableUnderline: true }}
             sx={{
-              color: "white",
-              ".MuiSelect-icon": {
-                color: "white",
-                right: "30px",
-              },
-              ".MuiInputBase-input": {
-                color: "white",
-                fontSize: "14px",
-                paddingRight: "20px",
-              },
-              backgroundColor: "transparent",
               width: 100,
+              color: "white",
+              background: "transparent",
+              ".MuiSelect-icon": { color: "white", right: "30px" },
+              ".MuiInputBase-input": { color: "white", fontSize: 14, pr: 2 },
             }}
           >
             <MenuItem value="EN">English</MenuItem>
@@ -147,82 +133,57 @@ const Nav = ({ openNav }: Props) => {
         </div>
       </div>
 
-      {/* Main Navbar */}
-      <div
-        className={`${
-          navBg ? "bg-white shadow-md" : "bg-white"
-        } transition-all duration-200 h-[12vh] flex items-center w-full`}
-      >
-        <div className="w-[90%] xl:w-[80%] mx-auto flex justify-between items-center">
+      {/* Main Nav */}
+      <div className={`${navBg ? "shadow-md" : ""} bg-white transition-all duration-200`}>
+        <div className="w-[90%] xl:w-[80%] mx-auto flex justify-between items-center h-[12vh]">
           {/* Logo */}
-          <h1 className="text-xl md:text-2xl font-bold text-black">
-            Exclusive
-          </h1>
+          <h1 className="text-xl md:text-2xl font-bold text-black">Exclusive</h1>
 
-          {/* Links */}
-          <div className="hidden lg:flex items-center space-x-8">
-            {navLinks.map((link) => {
-              const isActive = pathname === link.url;
-              return (
-                <Link key={link.id} href={link.url} legacyBehavior>
-                  <p
-                    className={`cursor-pointer text-base font-medium text-black relative after:block after:absolute after:bottom-[-2px] after:left-0 after:h-[2px] after:bg-gray-400 ${
-                      isActive ? "after:w-full" : "after:w-0"
-                    } hover:after:w-full after:transition-all after:duration-300`}
-                  >
-                    {link.label}
-                  </p>
-                </Link>
-              );
-            })}
+          {/* Nav Links */}
+          <div className="hidden lg:flex items-center gap-8">
+            {navLinks.map(({ id, url, label }) => (
+              <Link key={id} href={url}>
+                <p
+                  className={`text-base font-medium text-black relative after:block after:absolute after:bottom-[-2px] after:left-0 after:h-[2px] after:bg-gray-400
+                    ${pathname === url ? "after:w-full" : "after:w-0"} hover:after:w-full after:transition-all`}
+                >
+                  {label}
+                </p>
+              </Link>
+            ))}
           </div>
 
-          {/* Search + Icons */}
+          {/* Right Icons */}
           <div className="flex items-center gap-3">
             <TextField
               placeholder="What are you looking for?"
-              variant="outlined"
               size="small"
+              variant="outlined"
               sx={{
                 width: 250,
                 backgroundColor: "#f5f5f5",
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: "8px",
-                },
-                "& fieldset": {
-                  border: "none",
-                },
+                "& .MuiOutlinedInput-root": { borderRadius: 2 },
+                "& fieldset": { border: "none" },
               }}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
-                    <MUIIconButton edge="end">
-                      <FiSearch />
-                    </MUIIconButton>
+                    <MUIIconButton edge="end"><FiSearch /></MUIIconButton>
                   </InputAdornment>
                 ),
               }}
             />
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => router.push("/wishlist")}
-            >
+            <Button variant="ghost" size="icon" onClick={() => goTo("/wishlist")}>
               <FiHeart className="w-5 h-5" />
             </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="relative"
-              onClick={() => router.push("/cart")}
-            >
+            <Button variant="ghost" size="icon" className="relative" onClick={() => goTo("/cart")}>
               <Badge
-                badgeContent={totalQuantity}
+                // badgeContent={totalQuantity}
                 color="warning"
                 sx={{
                   position: "absolute",
-                  top: "0px",
-                  right: "0px",
+                  top: 0,
+                  right: 0,
                   "& .MuiBadge-badge": {
                     fontSize: "0.6rem",
                     height: 16,
@@ -233,80 +194,65 @@ const Nav = ({ openNav }: Props) => {
                 <FiShoppingCart className="w-6 h-6" />
               </Badge>
             </Button>
-            {isLoggedIn && (
-              <IconButton
-                onClick={handleClick}
-                sx={{
-                  backgroundColor: open ? "#ff8d2f" : "transparent",
-                  borderRadius: "50%",
-                  transition: "background-color 0.3s",
-                  "&:hover": {
-                    backgroundColor: "#ff8d2f",
-                  },
-                }}
-              >
-                <GoPerson
-                  style={{
-                    color: open ? "#fff" : "#000",
-                    transition: "color 0.3s",
-                  }}
-                />
-              </IconButton>
-            )}
 
-            <Menu
-              anchorEl={anchorEl}
-              open={open}
-              onClose={handleClose}
-              TransitionComponent={Fade}
-              PaperProps={{
-                sx: {
-                  mt: 1,
-                  width: 230,
-                  background: "rgba(255, 255, 255, 0.8)",
-                  color: "#ff8d2f",
-                  borderRadius: 2,
-                  boxShadow: 8,
-                  backdropFilter: "blur(3px)",
-                  WebkitBackdropFilter: "blur(10px)",
-                  border: "1px solid rgba(255, 255, 255, 0.2)",
-                },
-              }}
-              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-              transformOrigin={{ vertical: "top", horizontal: "right" }}
-            >
-              {menuItems.map(({ icon, label, href }) => (
-                <MenuItem
-                  key={label}
-                  onClick={handleClose}
-                  component="a"
-                  href={href}
+            {/* User menu */}
+            {isLoggedIn && (
+              <>
+                <IconButton
+                  onClick={openMenu}
                   sx={{
-                    "&:hover": {
-                      backgroundColor: "#ff8d2f",
-                      color: "#fff",
-                    },
+                    backgroundColor: menuOpen ? "#ff8d2f" : "transparent",
+                    "&:hover": { backgroundColor: "#ff8d2f" },
                   }}
                 >
-                  <ListItemIcon sx={{ color: "inherit", minWidth: 30 }}>
-                    {icon}
-                  </ListItemIcon>
-                  <Typography variant="body2">{label}</Typography>
-                </MenuItem>
-              ))}
-            </Menu>
-          </div>
-
-          {/* Mobile Nav Toggle */}
-          <div className="lg:hidden flex items-center">
-            <HiBars3BottomRight
-              onClick={openNav}
-              className="w-8 h-8 cursor-pointer text-black"
-            />
+                  <GoPerson style={{ color: menuOpen ? "#fff" : "#000" }} />
+                </IconButton>
+                <Menu
+                  anchorEl={menuAnchor}
+                  open={menuOpen}
+                  onClose={closeMenu}
+                  TransitionComponent={Fade}
+                  PaperProps={{
+                    sx: {
+                      mt: 1,
+                      width: 230,
+                      borderRadius: 2,
+                      boxShadow: 8,
+                      bgcolor: "rgba(255, 255, 255, 0.9)",
+                      backdropFilter: "blur(10px)",
+                      border: "1px solid rgba(255,255,255,0.2)",
+                    },
+                  }}
+                  anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                  transformOrigin={{ vertical: "top", horizontal: "right" }}
+                >
+                  {menuItems.map(({ icon, label, href }) => (
+                    <MenuItem
+                      key={label}
+                      onClick={() => {
+                        closeMenu();
+                        goTo(href);
+                      }}
+                      sx={{ "&:hover": { bgcolor: "#ff8d2f", color: "#fff" } }}
+                    >
+                      <ListItemIcon sx={{ color: "inherit", minWidth: 30 }}>{icon}</ListItemIcon>
+                      <Typography variant="body2">{label}</Typography>
+                    </MenuItem>
+                  ))}
+                </Menu>
+              </>
+            )}
+            {/* Mobile Nav Toggle */}
+            <div className="lg:hidden">
+              <HiBars3BottomRight
+                onClick={openNav}
+                className="w-8 h-8 text-black cursor-pointer"
+              />
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </Stack>
   );
 };
 

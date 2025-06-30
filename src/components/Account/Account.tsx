@@ -15,6 +15,13 @@ import Link from "next/link";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+
+interface UpdateUserPayload {
+  fullName: string;
+  address?: string;
+}
+
 const Account = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -25,77 +32,54 @@ const Account = () => {
   const router = useRouter();
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const accessTokenLocal = localStorage.getItem("accessToken");
-        const refreshTokenLocal = localStorage.getItem("refreshToken");
+  const fetchUser = async () => {
+    try {
+      const accessTokenLocal = localStorage.getItem("accessToken");
+      const refreshTokenLocal = localStorage.getItem("refreshToken");
 
-        console.log("📦 [Token] accessToken:", accessTokenLocal);
-        console.log("📦 [Token] refreshToken:", refreshTokenLocal);
-
-        if (!accessTokenLocal || !refreshTokenLocal) {
-          console.warn("❌ Không tìm thấy token, chuyển hướng login...");
-          router.push("/login");
-          return;
-        }
-
-        setAccessToken(accessTokenLocal);
-
-        const res = await axios.get(
-          "https://42da-2a09-bac1-7ac0-10-00-2e4-a0.ngrok-free.app/api/user/get-user",
-          {
-            headers: {
-              Authorization: `Bearer ${accessTokenLocal}`,
-              // Accept: "application/json",
-            },
-            withCredentials: true,
-            // params: {
-            //   refreshToken: refreshTokenLocal,
-            // },
-          }
-        );
-        console.log("👉 Authorization header:", res.headers.authorization);
-
-        console.log("✅ [RESPONSE] Server trả về:", res);
-
-        const user = res?.data?.user;
-        console.log("📦 [USER DATA] Dữ liệu user:", user);
-
-        if (!user) {
-          console.warn("⚠️ Không có dữ liệu user trả về.");
-          return;
-        }
-
-        const parts = user.fullName?.trim()?.split(" ") || [];
-        setFirstName(parts[0] || "");
-        setLastName(parts.slice(1).join(" ") || "");
-        setEmail(user.email || "");
-        setAddress(user.address || "");
-      } catch (error) {
-        console.error("❌ [ERROR] Lỗi khi fetch user:", error);
-
-        if (axios.isAxiosError(error)) {
-          console.error(
-            "🔴 [AXIOS ERROR] Lỗi từ server:",
-            error.response?.data
-          );
-          console.error("🔴 [STATUS]", error.response?.status);
-        } else {
-          console.error("🔴 [UNKNOWN ERROR]", error);
-        }
-
+      if (!accessTokenLocal || !refreshTokenLocal) {
+        console.warn("❌ Không tìm thấy token, chuyển hướng login...");
         router.push("/login");
+        return;
       }
-    };
 
-    console.log("🔍 useEffect chạy lần đầu...");
-    if (typeof window !== "undefined") {
-      console.log("🧠 Đang trong môi trường browser, gọi fetchUser...");
-      fetchUser();
-    } else {
-      console.warn("🚨 useEffect không chạy trong trình duyệt.");
+      setAccessToken(accessTokenLocal);
+
+      const res = await fetch(`${baseUrl}/api/user/get-user`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessTokenLocal}`,
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch user");
+      }
+
+      const result = await res.json();
+      const user = result?.data;
+
+      if (!user) {
+        console.warn("⚠️ Không có dữ liệu user trả về.");
+        return;
+      }
+
+      const parts = user.fullName?.trim()?.split(" ") || [];
+      setFirstName(parts[0] || "");
+      setLastName(parts.slice(1).join(" ") || "");
+      setEmail(user.email || "");
+      setAddress(user.address || "");
+    } catch (error) {
+      console.error("❌ [ERROR] Lỗi khi fetch user:", error);
+      router.push("/login");
     }
-  }, [router]);
+  };
+
+  fetchUser();
+}, [router]); // ✅ include `router`
+
 
   const handleSave = async () => {
     try {
@@ -104,28 +88,37 @@ const Account = () => {
         return;
       }
 
-      const res = await axios.put(
-        "https://de20-2a09-bac1-7aa0-10-00-23-473.ngrok-free.app/api/user/update-user",
-        {
-          fullName: `${firstName} ${lastName}`,
-          address,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-          withCredentials: true,
-        }
-      );
+      const payload: UpdateUserPayload = {
+        fullName: `${firstName} ${lastName}`,
+      };
+      if (address.trim()) payload.address = address;
 
-      if (res.status === 200) {
+      const res = await axios.put(`${baseUrl}/api/user/user`, payload, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        withCredentials: true,
+      });
+
+      const result = res.data;
+
+      if (result.success) {
         alert("✅ Cập nhật hồ sơ thành công!");
+
+        if (result?.data?.otp) {
+          const { otp, type } = result.data.otp;
+          console.log("📲 OTP:", otp, "Loại:", type);
+          router.push(`/verify-otp?type=${type}`);
+        }
       } else {
-        alert("❌ Không thể cập nhật. Vui lòng thử lại.");
+        alert("❌ Không thể cập nhật: " + result.message);
       }
-    } catch (error) {
-      console.error("❌ Error updating user:", error);
-      alert("❌ Có lỗi xảy ra khi cập nhật.");
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        alert("🚫 " + (error.response?.data?.message || "Lỗi server."));
+      } else {
+        alert("🚫 Lỗi không xác định khi cập nhật.");
+      }
     }
   };
 
@@ -139,12 +132,7 @@ const Account = () => {
           <Typography color="text.primary">My Account</Typography>
         </Breadcrumbs>
 
-        <Stack
-          direction={{ xs: "column", md: "row" }}
-          spacing={4}
-          alignItems="flex-start"
-          mt={2}
-        >
+        <Stack direction={{ xs: "column", md: "row" }} spacing={4}>
           {/* Sidebar */}
           <Box width={{ xs: "100%", md: 250 }}>
             <Typography fontWeight="bold" mb={1}>
@@ -152,81 +140,25 @@ const Account = () => {
             </Typography>
             <Stack spacing={1} pl={1} mb={3}>
               <Link href="/account/profile" passHref legacyBehavior>
-                <Typography
-                  color="orange"
-                  fontSize={14}
-                  sx={{ cursor: "pointer" }}
-                >
+                <Typography color="orange" fontSize={14} sx={{ cursor: "pointer" }}>
                   My Profile
                 </Typography>
               </Link>
               <Link href="/account/address-book" passHref legacyBehavior>
-                <Typography
-                  color="gray"
-                  fontSize={14}
-                  sx={{ cursor: "pointer" }}
-                >
+                <Typography color="gray" fontSize={14} sx={{ cursor: "pointer" }}>
                   Address Book
                 </Typography>
               </Link>
               <Link href="/account/payment-options" passHref legacyBehavior>
-                <Typography
-                  color="gray"
-                  fontSize={14}
-                  sx={{ cursor: "pointer" }}
-                >
+                <Typography color="gray" fontSize={14} sx={{ cursor: "pointer" }}>
                   My Payment Options
                 </Typography>
               </Link>
             </Stack>
-
-            <Typography fontWeight="bold" mb={1}>
-              My Orders
-            </Typography>
-            <Stack spacing={1} pl={1} mb={3}>
-              <Link href="/account/returns" passHref legacyBehavior>
-                <Typography
-                  color="gray"
-                  fontSize={14}
-                  sx={{ cursor: "pointer" }}
-                >
-                  My Returns
-                </Typography>
-              </Link>
-              <Link href="/account/cancellations" passHref legacyBehavior>
-                <Typography
-                  color="gray"
-                  fontSize={14}
-                  sx={{ cursor: "pointer" }}
-                >
-                  My Cancellations
-                </Typography>
-              </Link>
-            </Stack>
-
-            <Box mb={1}>
-              <Link href="/account/wishlist" passHref legacyBehavior>
-                <Typography
-                  fontWeight="bold"
-                  color="gray"
-                  fontSize={14}
-                  sx={{ cursor: "pointer" }}
-                >
-                  My Wishlist
-                </Typography>
-              </Link>
-            </Box>
           </Box>
 
           {/* Form */}
-          <Box
-            flex={1}
-            p={4}
-            boxShadow={1}
-            borderRadius={2}
-            bgcolor="#fff"
-            width="100%"
-          >
+          <Box flex={1} p={4} boxShadow={1} borderRadius={2} bgcolor="#fff">
             <Typography fontWeight="bold" fontSize={18} color="#ff8d2f" mb={3}>
               Edit Your Profile
             </Typography>

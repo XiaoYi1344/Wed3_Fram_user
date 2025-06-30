@@ -11,61 +11,67 @@ import {
   Breadcrumbs,
 } from "@mui/material";
 import { useRouter, useSearchParams } from "next/navigation";
-import axios from "axios";
+import { useForm, Controller } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { schemaOtp } from "@/utils/validator";
+import { useMutation } from "@tanstack/react-query";
+import { verifyOtp, resendOtp, stopVerifyOtp } from "@/services/authentication";
+
+type OtpForm = {
+  otp: string;
+};
+
+type OtpResponse = {
+  success: boolean;
+  message?: string;
+  otp?: string;
+};
 
 const MAX_ATTEMPTS = 3;
 const MAX_RESENDS = 3;
 
 const VerifyOtpPage = () => {
-  const searchParams = useSearchParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const userId = searchParams.get("userId");
   const email = searchParams.get("email") || "";
   const phone = searchParams.get("phone") || "";
+  const type = phone ? "verify-phone" : "verify-email";
 
-  const [otp, setOtp] = useState("");
-  const [error, setError] = useState("");
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<OtpForm>({
+    resolver: yupResolver(schemaOtp),
+  });
+
   const [info, setInfo] = useState("");
+  const [error, setError] = useState("");
   const [attempts, setAttempts] = useState(0);
   const [resendCount, setResendCount] = useState(0);
   const [cooldown, setCooldown] = useState(0);
-  const [loading, setLoading] = useState(false);
 
-  const type = phone ? "verify-phone" : "verify-email";
-
-  // Countdown cooldown
   useEffect(() => {
     if (cooldown > 0) {
-      const interval = setInterval(() => {
-        setCooldown((prev) => prev - 1);
-      }, 1000);
-      return () => clearInterval(interval);
+      const timer = setInterval(() => setCooldown((prev) => prev - 1), 1000);
+      return () => clearInterval(timer);
     }
   }, [cooldown]);
 
-  const handleSubmitOtp = async () => {
-    if (!userId || !otp) {
-      setError("Vui lòng nhập mã OTP.");
-      return;
-    }
+  const verifyOtpMutation = useMutation({
+    mutationFn: async (data: OtpForm) =>
+      verifyOtp({ userId: userId!, otp: data.otp, type }),
+    onSuccess: (response) => {
+      const data: OtpResponse = response.data;
 
-    setLoading(true);
-    setError("");
-    setInfo("");
-
-    try {
-      const response = await axios.post(
-        "https://de20-2a09-bac1-7aa0-10-00-23-473.ngrok-free.app/api/authentication/verify-otp",
-        { userId, otp, type },
-        { withCredentials: true }
-      );
-
-      if (response.data.success) {
+      if (data.success) {
         setInfo("Xác minh thành công. Chuyển hướng...");
         setTimeout(() => router.push("/login"), 2000);
       } else {
-        const msg = response.data.message || "OTP không đúng";
+        const msg = data.message || "OTP không đúng";
         setError(msg);
         setAttempts((prev) => prev + 1);
 
@@ -75,73 +81,45 @@ const VerifyOtpPage = () => {
           setError("Bạn đã nhập sai 3 lần. Vui lòng chờ 60 giây.");
         }
       }
-    } catch (err) {
-      console.error("Lỗi xác minh:", err);
-      setError("Lỗi xác minh OTP.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    onError: () => {
+      setError("Đã xảy ra lỗi xác minh OTP.");
+    },
+  });
 
-  const handleResendOtp = async () => {
-    if (!userId) return;
-
-    if (resendCount >= MAX_RESENDS) {
-      setError("Đã vượt quá số lần gửi lại. Tài khoản sẽ bị xoá...");
-      try {
-        await axios.post(
-          "https://de20-2a09-bac1-7aa0-10-00-23-473.ngrok-free.app/api/authentication/stop-verify-otp",
-          { userId },
-          { withCredentials: true }
-        );
-      } catch (err) {
-        console.error("Lỗi xoá tài khoản:", err);
-      }
-      setTimeout(() => router.push("/register"), 3000);
-      return;
-    }
-
-    try {
-      const payload = {
-        userId,
+  const resendOtpMutation = useMutation({
+    mutationFn: async () =>
+      resendOtp({
+        userId: userId!,
         type,
         ...(phone ? { phone } : { email }),
-      };
+      }),
+    onSuccess: (response) => {
+      const data: OtpResponse = response.data;
 
-      const response = await axios.post(
-        "https://de20-2a09-bac1-7aa0-10-00-23-473.ngrok-free.app/api/authentication/again-otp",
-        payload,
-        { withCredentials: true }
-      );
-      console.log("Dữ liệu:", response);
-
-      if (response.data.success) {
+      if (data.success) {
         setInfo("Mã OTP đã được gửi lại.");
         setResendCount((prev) => prev + 1);
         setAttempts(0);
-        setOtp(""); // reset field OTP
+        reset();
 
-        // 👉 Log OTP nếu backend trả về
-        if (response.data.otp) {
-          console.log("Mã OTP là:", response.data.otp);
+        if (data.otp) {
+          console.log("Mã OTP (dev only):", data.otp);
         }
       } else {
-        setError(response.data.message || "Không thể gửi lại mã OTP.");
+        setError(data.message || "Không thể gửi lại mã OTP.");
       }
-    } catch (err) {
-      console.error("Lỗi gửi lại mã:", err);
-      setError("Lỗi gửi lại OTP.");
-    }
-  };
+    },
+    onError: () => {
+      setError("Lỗi gửi lại mã OTP.");
+    },
+  });
 
   const handleStopVerify = async () => {
     if (!userId) return;
+
     try {
-      await axios.post(
-        "https://de20-2a09-bac1-7aa0-10-00-23-473.ngrok-free.app/api/authentication/stop-verify-otp",
-        { userId },
-        { withCredentials: true }
-      );
+      await stopVerifyOtp(userId);
     } catch (err) {
       console.error("Lỗi hủy xác minh:", err);
     } finally {
@@ -149,23 +127,29 @@ const VerifyOtpPage = () => {
     }
   };
 
+  const onSubmit = (data: OtpForm) => {
+    setError("");
+    setInfo("");
+    verifyOtpMutation.mutate(data);
+  };
+
+  const handleResend = () => {
+    if (resendCount >= MAX_RESENDS) {
+      setError("Đã vượt quá số lần gửi lại. Tài khoản sẽ bị xoá...");
+      setTimeout(() => handleStopVerify(), 3000);
+      return;
+    }
+
+    resendOtpMutation.mutate();
+  };
+
   return (
     <Stack mt={30}>
       <Breadcrumbs aria-label="breadcrumb" sx={{ mx: 15 }}>
-        <Link
-          color="inherit"
-          href="/"
-          underline="none"
-          sx={{ "&:hover": { color: "black" } }}
-        >
+        <Link href="/" underline="none" sx={{ "&:hover": { color: "black" } }}>
           Home
         </Link>
-        <Link
-          color="inherit"
-          href="/signup"
-          underline="none"
-          sx={{ "&:hover": { color: "black" } }}
-        >
+        <Link href="/signup" underline="none" sx={{ "&:hover": { color: "black" } }}>
           Sign Up
         </Link>
         <Typography color="textPrimary">OTP</Typography>
@@ -187,47 +171,56 @@ const VerifyOtpPage = () => {
           Vui lòng nhập mã OTP được gửi tới {email || phone}
         </Typography>
 
-        <Stack spacing={2}>
-          {error && <Alert severity="error">{error}</Alert>}
-          {info && <Alert severity="success">{info}</Alert>}
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Stack spacing={2}>
+            {error && <Alert severity="error">{error}</Alert>}
+            {info && <Alert severity="success">{info}</Alert>}
 
-          <TextField
-            label="Nhập mã OTP"
-            value={otp}
-            onChange={(e) => setOtp(e.target.value)}
-            disabled={cooldown > 0}
-            fullWidth
-          />
+            <Controller
+              name="otp"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Nhập mã OTP"
+                  disabled={cooldown > 0}
+                  error={!!errors.otp}
+                  helperText={errors.otp?.message}
+                  fullWidth
+                />
+              )}
+            />
 
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleSubmitOtp}
-            disabled={loading || cooldown > 0}
-            fullWidth
-          >
-            {loading ? "Đang xác minh..." : "Xác minh"}
-          </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              disabled={verifyOtpMutation.isPending || cooldown > 0}
+              fullWidth
+            >
+              {verifyOtpMutation.isPending ? "Đang xác minh..." : "Xác minh"}
+            </Button>
 
-          <Button
-            variant="outlined"
-            onClick={handleResendOtp}
-            disabled={resendCount >= MAX_RESENDS}
-            fullWidth
-          >
-            Gửi lại mã OTP ({MAX_RESENDS - resendCount} lần còn lại)
-          </Button>
+            <Button
+              variant="outlined"
+              onClick={handleResend}
+              disabled={resendCount >= MAX_RESENDS}
+              fullWidth
+            >
+              Gửi lại mã OTP ({MAX_RESENDS - resendCount} lần còn lại)
+            </Button>
 
-          {cooldown > 0 && (
-            <Typography color="error" align="center">
-              Vui lòng chờ {cooldown}s để thử lại
-            </Typography>
-          )}
+            {cooldown > 0 && (
+              <Typography color="error" align="center">
+                Vui lòng chờ {cooldown}s để thử lại
+              </Typography>
+            )}
 
-          <Button variant="text" color="error" onClick={handleStopVerify}>
-            Hủy xác minh & Xóa tài khoản
-          </Button>
-        </Stack>
+            <Button variant="text" color="error" onClick={handleStopVerify}>
+              Hủy xác minh & Xóa tài khoản
+            </Button>
+          </Stack>
+        </form>
       </Box>
     </Stack>
   );

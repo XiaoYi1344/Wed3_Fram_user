@@ -10,9 +10,10 @@ import {
   setTokens,
   clearTokens,
 } from "../utils/auth";
+import { RegisterPayload } from "@/constant/type-res-api";
 
 const api = axios.create({
-  baseURL: "https://ee73-2a09-bac5-d46c-15f-00-23-47b.ngrok-free.app/api", // ⚠️ Đổi lại URL đúng
+  baseURL: "https://retrieve-ibbn.onrender.com",
 });
 
 let isRefreshing = false;
@@ -67,7 +68,7 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const res = await axios.post("https://ee73-2a09-bac5-d46c-15f-00-23-47b.ngrok-free.app/api/authentication/refresh-token", {
+        const res = await axios.post(`${api.defaults.baseURL}/authentication/refresh-token`, {
           refreshToken: getRefreshToken(),
         });
 
@@ -92,5 +93,14 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+export const postRegister = async (data: RegisterPayload) => {
+  return await api.post("/api/authentication/register", data);
+};
+
+export const postLogin = async (data: { email: string; password: string }) => {
+  return await api.post("/api/authentication/login", data, { withCredentials: true });
+};
+
 
 export default api;

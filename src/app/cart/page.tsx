@@ -1,62 +1,52 @@
 "use client";
-
-import { useCart } from "@/hook/useCart";
-import { Stack } from "@mui/material";
-// import Image from "next/image";
+import React from "react";
+import { useCart } from "@/context/CartContext";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
-export default function CartPage() {
-  const { items, updateQuantity, removeItem, subtotal } = useCart();
+const CartPage = () => {
+  const { cartItems, updateQuantity, subtotal } = useCart();
   const router = useRouter();
 
   return (
-    <Stack my={20}>
-        <div className="p-4">
-      <h1 className="text-xl font-bold mb-4">Your Cart</h1>
-
-      {items.length === 0 ? (
-        <p>Your cart is empty.</p>
-      ) : (
-        <>
-          <ul className="space-y-4">
-            {items.map((item) => (
-              <li key={item.id} className="flex justify-between items-center border p-3 rounded">
-                <div>
-                    {/* <Image fill /> */}
-                  <p className="font-semibold">{item.title}</p>
-                  <p>${item.price.toFixed(2)} x {item.quantity}</p>
-                  <input
-                    type="number"
-                    min={1}
-                    value={item.quantity}
-                    onChange={(e) => updateQuantity(item.id, Number(e.target.value))}
-                    className="w-16 mt-1 border px-2"
-                  />
-                </div>
-                <button
-                  className="text-red-500"
-                  onClick={() => removeItem(item.id)}
+    <div className="p-8">
+      <h2 className="text-2xl font-bold mb-6">Cart</h2>
+      <table className="w-full border">
+        <thead>
+          <tr>
+            <th>Product</th><th>Price</th><th>Quantity</th><th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {cartItems.map((item) => (
+            <tr key={item.id}>
+              <td>{item.name}</td>
+              <td>${item.price}</td>
+              <td>
+                <select
+                  value={item.quantity}
+                  onChange={(e) =>
+                    updateQuantity(item.id, Number(e.target.value))
+                  }
                 >
-                  Remove
-                </button>
-              </li>
-            ))}
-          </ul>
-
-          <div className="mt-6 flex justify-between">
-            <strong>Total:</strong>
-            <span>${subtotal.toFixed(2)}</span>
-          </div>
-
-          <button
-            onClick={() => router.push("/checkout")}
-            className="mt-6 bg-black text-white px-4 py-2 rounded"
-          >
-            Proceed to Checkout
-          </button>
-        </>
-      )}
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <option key={n} value={n}>{n}</option>
+                  ))}
+                </select>
+              </td>
+              <td>${item.price * item.quantity}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div className="mt-4">
+        <p className="font-bold">Subtotal: ${subtotal}</p>
+        <Button onClick={() => router.push("/checkout")} className="mt-4 bg-orange-500 text-white">
+          Proceed to Checkout
+        </Button>
+      </div>
     </div>
-    </Stack>
   );
-}
+};
+
+export default CartPage;

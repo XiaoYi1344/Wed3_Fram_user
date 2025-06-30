@@ -18,6 +18,7 @@ import Link from "next/link";
 
 const Footer = () => {
   return (
+    <Box >
     <Box sx={{ bgcolor: "#000", color: "#fff", px: 6, pt: 8, pb: 2 }}>
       <Grid container spacing={4}>
         {/* Exclusive & Subscribe */}
@@ -248,6 +249,7 @@ const Footer = () => {
       <Typography variant="body2" textAlign="center" color="gray">
         © Copyright Rimel 2022. All right reserved
       </Typography>
+    </Box>
     </Box>
   );
 };

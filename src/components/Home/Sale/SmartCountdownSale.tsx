@@ -80,20 +80,33 @@ const SmartCountdownSale: React.FC<Props> = ({ saleDays }) => {
     <Box display="flex" flexDirection="column" alignItems="center">
       {target ? (
         <>
-          <Typography variant="h6" fontWeight="bold" gutterBottom>
+          <Typography
+            variant="h6"
+            fontWeight="bold"
+            gutterBottom
+            fontSize={{ sm: 15, md: 20 }}
+          >
             ⏰ {label}
           </Typography>
-          <Box display="flex" alignItems="center" gap={1}>
+          <Box display="flex" alignItems="center" gap={1} mx="50%">
             {timeUnits.map((unit, index) => (
               <React.Fragment key={unit.label}>
                 <Box textAlign="center">
-                  <Typography variant="caption" fontWeight="bold">
+                  <Typography
+                    variant="caption"
+                    fontWeight="bold"
+                    fontSize={{ sm: 10, md: 15 }}
+                  >
                     {unit.label}
                   </Typography>
                   <Typography
                     variant="h5"
                     fontWeight="bold"
-                    sx={{ lineHeight: 1 }}
+                    sx={{
+                      fontSize: { xs: 20, sm: 25, md: 100 }, // đổi font size số
+                      fontFamily: "monospace", // ví dụ: số rõ ràng hơn
+                      lineHeight: 1.2,
+                    }}
                   >
                     <AnimatedNumberRolling number={unit.value} />
                   </Typography>

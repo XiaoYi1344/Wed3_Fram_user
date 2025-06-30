@@ -27,4 +27,15 @@ export const navLinks = [
     url: "/verify-otp",
     label: "OTP",
   },
+  {
+    id: 6,
+    url: "/cart",
+    label: "Cart",
+  },
+  {
+    id: 7,
+    url: "/checkout",
+    label: "CheckOut",
+  },
+  
 ];

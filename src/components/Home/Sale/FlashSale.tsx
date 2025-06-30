@@ -162,7 +162,7 @@ const FlashSales = () => {
   const handleAddToCart = (item: (typeof productSales)[0]) => {
     addItem({
       id: item.id,
-      title: item.title,
+      name: item.title,
       image: item.image,
       price: item.newPrice,
       quantity: 1,
@@ -172,9 +172,10 @@ const FlashSales = () => {
   // const next = getNextFlashSale();
 
   return (
-    <Box px={8} py={4}>
+    <Box px={8} py={{sm: 28, md: 20}}>
       <Box display="flex" alignItems="center" gap={1} mb={3}>
         <Box
+        fontSize={{sm: 20, md: 35}}
           sx={{
             width: 20,
             height: 40,
@@ -195,7 +196,7 @@ const FlashSales = () => {
         mb={2}
         px={1}
       >
-        <Typography variant="h4" fontWeight="bold">
+        <Typography variant="h4" fontWeight="bold" fontSize={{sm: 20, md: 35}}>
           Flash Sales
         </Typography>
 
