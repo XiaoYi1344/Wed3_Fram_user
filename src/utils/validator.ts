@@ -23,14 +23,18 @@ export const schemaRegister: yup.ObjectSchema<RegisterFormValues> = yup.object({
 
 // ✅ Login schema
 export const schemaLogin = yup.object({
-  email: yup
+  identifier: yup
     .string()
     .required("Vui lòng nhập email hoặc số điện thoại")
-    .test("is-valid", "Email hoặc số điện thoại không hợp lệ", (value) => {
-      const isEmail = /\S+@\S+\.\S+/.test(value || "");
-      const isPhone = /^\d{9,11}$/.test(value || "");
-      return isEmail || isPhone;
-    }),
+    .test(
+      "is-valid-identifier",
+      "Email hoặc số điện thoại không hợp lệ",
+      (value = "") => {
+        const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+        const isPhone = /^(0|\+84)\d{9}$/.test(value.trim());
+        return isEmail || isPhone;
+      }
+    ),
   password: yup.string().required("Vui lòng nhập mật khẩu"),
 });
 

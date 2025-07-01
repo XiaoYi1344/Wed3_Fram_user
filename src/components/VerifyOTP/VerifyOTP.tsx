@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
 import {
   Box,
@@ -17,15 +18,8 @@ import { schemaOtp } from "@/utils/validator";
 import { useMutation } from "@tanstack/react-query";
 import { verifyOtp, resendOtp, stopVerifyOtp } from "@/services/authentication";
 
-type OtpForm = {
-  otp: string;
-};
-
-type OtpResponse = {
-  success: boolean;
-  message?: string;
-  otp?: string;
-};
+type OtpForm = { otp: string };
+type OtpResponse = { success: boolean; message?: string; otp?: string };
 
 const MAX_ATTEMPTS = 3;
 const MAX_RESENDS = 3;
@@ -55,6 +49,10 @@ const VerifyOtpPage = () => {
   const [cooldown, setCooldown] = useState(0);
 
   useEffect(() => {
+    if (!userId) router.push("/signup");
+  }, [userId]);
+
+  useEffect(() => {
     if (cooldown > 0) {
       const timer = setInterval(() => setCooldown((prev) => prev - 1), 1000);
       return () => clearInterval(timer);
@@ -71,8 +69,7 @@ const VerifyOtpPage = () => {
         setInfo("Xác minh thành công. Chuyển hướng...");
         setTimeout(() => router.push("/login"), 2000);
       } else {
-        const msg = data.message || "OTP không đúng";
-        setError(msg);
+        setError(data.message || "OTP không đúng");
         setAttempts((prev) => prev + 1);
 
         if (attempts + 1 >= MAX_ATTEMPTS) {
@@ -82,18 +79,12 @@ const VerifyOtpPage = () => {
         }
       }
     },
-    onError: () => {
-      setError("Đã xảy ra lỗi xác minh OTP.");
-    },
+    onError: () => setError("Đã xảy ra lỗi xác minh OTP."),
   });
 
   const resendOtpMutation = useMutation({
     mutationFn: async () =>
-      resendOtp({
-        userId: userId!,
-        type,
-        ...(phone ? { phone } : { email }),
-      }),
+      resendOtp({ userId: userId!, type, ...(phone ? { phone } : { email }) }),
     onSuccess: (response) => {
       const data: OtpResponse = response.data;
 
@@ -102,26 +93,17 @@ const VerifyOtpPage = () => {
         setResendCount((prev) => prev + 1);
         setAttempts(0);
         reset();
-
-        if (data.otp) {
-          console.log("Mã OTP (dev only):", data.otp);
-        }
       } else {
         setError(data.message || "Không thể gửi lại mã OTP.");
       }
     },
-    onError: () => {
-      setError("Lỗi gửi lại mã OTP.");
-    },
+    onError: () => setError("Lỗi gửi lại mã OTP."),
   });
 
   const handleStopVerify = async () => {
     if (!userId) return;
-
     try {
       await stopVerifyOtp(userId);
-    } catch (err) {
-      console.error("Lỗi hủy xác minh:", err);
     } finally {
       router.push("/signup");
     }
@@ -133,42 +115,20 @@ const VerifyOtpPage = () => {
     verifyOtpMutation.mutate(data);
   };
 
-  const handleResend = () => {
-    if (resendCount >= MAX_RESENDS) {
-      setError("Đã vượt quá số lần gửi lại. Tài khoản sẽ bị xoá...");
-      setTimeout(() => handleStopVerify(), 3000);
-      return;
-    }
-
-    resendOtpMutation.mutate();
-  };
-
   return (
     <Stack mt={30}>
       <Breadcrumbs aria-label="breadcrumb" sx={{ mx: 15 }}>
-        <Link href="/" underline="none" sx={{ "&:hover": { color: "black" } }}>
-          Home
-        </Link>
-        <Link href="/signup" underline="none" sx={{ "&:hover": { color: "black" } }}>
-          Sign Up
-        </Link>
-        <Typography color="textPrimary">OTP</Typography>
+        <Link href="/">Trang chủ</Link>
+        <Link href="/signup">Đăng ký</Link>
+        <Typography color="textPrimary">Xác minh OTP</Typography>
       </Breadcrumbs>
 
-      <Box
-        maxWidth={400}
-        mx="auto"
-        my={10}
-        px={4}
-        py={8}
-        borderRadius={3}
-        boxShadow={4}
-      >
+      <Box maxWidth={400} mx="auto" my={10} p={4} boxShadow={3} borderRadius={2}>
         <Typography variant="h5" fontWeight={600} mb={2}>
-          Xác thực tài khoản
+          Xác thực OTP
         </Typography>
         <Typography variant="body2" color="textSecondary" mb={3}>
-          Vui lòng nhập mã OTP được gửi tới {email || phone}
+          Nhập mã OTP gửi đến {email || phone}
         </Typography>
 
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -182,7 +142,7 @@ const VerifyOtpPage = () => {
               render={({ field }) => (
                 <TextField
                   {...field}
-                  label="Nhập mã OTP"
+                  label="Mã OTP"
                   disabled={cooldown > 0}
                   error={!!errors.otp}
                   helperText={errors.otp?.message}
@@ -194,7 +154,6 @@ const VerifyOtpPage = () => {
             <Button
               type="submit"
               variant="contained"
-              color="primary"
               disabled={verifyOtpMutation.isPending || cooldown > 0}
               fullWidth
             >
@@ -203,15 +162,21 @@ const VerifyOtpPage = () => {
 
             <Button
               variant="outlined"
-              onClick={handleResend}
-              disabled={resendCount >= MAX_RESENDS}
+              onClick={() => {
+                if (resendCount >= MAX_RESENDS) {
+                  setError("Vượt quá số lần gửi lại. Hủy tài khoản...");
+                  setTimeout(() => handleStopVerify(), 3000);
+                  return;
+                }
+                resendOtpMutation.mutate();
+              }}
               fullWidth
             >
-              Gửi lại mã OTP ({MAX_RESENDS - resendCount} lần còn lại)
+              Gửi lại OTP ({MAX_RESENDS - resendCount} lần còn lại)
             </Button>
 
             {cooldown > 0 && (
-              <Typography color="error" align="center">
+              <Typography align="center" color="error">
                 Vui lòng chờ {cooldown}s để thử lại
               </Typography>
             )}

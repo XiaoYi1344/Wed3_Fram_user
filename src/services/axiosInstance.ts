@@ -10,7 +10,7 @@ import {
   setTokens,
   clearTokens,
 } from "../utils/auth";
-import { RegisterPayload } from "@/constant/type-res-api";
+import {RegisterPayload } from "@/constant/type-res-api";
 
 const api = axios.create({
   baseURL: "https://retrieve-ibbn.onrender.com",
@@ -98,9 +98,20 @@ export const postRegister = async (data: RegisterPayload) => {
   return await api.post("/api/authentication/register", data);
 };
 
-export const postLogin = async (data: { email: string; password: string }) => {
-  return await api.post("/api/authentication/login", data, { withCredentials: true });
+// axiosInstance.ts
+type LoginPayload = {
+  email?: string;
+  phone?: string;
+  password: string;
 };
+
+// services/axiosInstance.ts
+export const postLogin = async (payload: LoginPayload) => {
+  const res = await api.post("/api/authentication/login", payload);
+  return res.data; // ⬅ PHẢI có dòng này
+};
+
+
 
 
 export default api;

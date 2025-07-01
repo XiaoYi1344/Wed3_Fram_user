@@ -1,4 +1,4 @@
-// import Footer from "@/components/Footer/Footer";
+import Footer from "@/components/Footer/Footer";
 import ResponsiveNav from "@/components/Navbar/ResponsiveNav";
 import type { Metadata } from "next";
 import { ToastContainer } from "react-toastify";
@@ -21,7 +21,7 @@ export default function RootLayout({
           <ResponsiveNav />
           {children}
           <ToastContainer />
-          {/* <Footer /> */}
+          <Footer />
         </ClientProvider>
       </body>
     </html>

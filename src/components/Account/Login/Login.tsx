@@ -24,7 +24,13 @@ import { AxiosError } from "axios";
 import { LoginResponse } from "@/constant/type-res-api";
 
 type LoginForm = {
-  email: string;
+  identifier: string; // email hoặc phone
+  password: string;
+};
+
+type LoginPayload = {
+  email?: string;
+  phone?: string;
   password: string;
 };
 
@@ -47,6 +53,10 @@ const Login = () => {
     formState: { errors },
   } = useForm<LoginForm>({
     resolver: yupResolver(schemaLogin),
+    defaultValues: {
+      identifier: "",
+      password: "",
+    },
   });
 
   const [error, setError] = React.useState<string | null>(null);
@@ -54,30 +64,29 @@ const Login = () => {
   const mutation = useMutation<
     LoginResponse,
     AxiosError<{ message?: string; detail?: string }>,
-    LoginForm
+    LoginPayload
   >({
     mutationFn: postLogin,
     onSuccess: (data) => {
-      const accessToken =
-        data.accessToken ||
-        data.token ||
-        data.jwt ||
-        data?.data?.accessToken;
-      const refreshToken = data.refreshToken || data?.data?.refreshToken;
+      console.log("LOGIN SUCCESS RESPONSE:", data); 
+      // const accessToken =
+      //   data.accessToken || data.token || data.jwt || data?.data?.accessToken;
+      // const refreshToken = data.refreshToken || data?.data?.refreshToken;
+
+      const accessToken = data?.data?.accessToken;
+const refreshToken = data?.data?.refreshToken;
 
       if (!accessToken || !refreshToken) {
         throw new Error("Không nhận được token.");
       }
 
+      debugger
       localStorage.setItem("accessToken", accessToken);
       localStorage.setItem("refreshToken", refreshToken);
 
       const decoded = jwtDecode<DecodedToken>(accessToken);
       const role =
-        decoded.roles?.[0] ||
-        decoded.permission?.[0] ||
-        decoded.role ||
-        "user";
+        decoded.roles?.[0] || decoded.permission?.[0] || decoded.role || "user";
 
       localStorage.setItem(
         "userInfo",
@@ -88,7 +97,8 @@ const Login = () => {
         })
       );
 
-      router.push("/account/profile");
+      // router.push("/account/profile");
+      router.push("/");
     },
     onError: (err) => {
       const msg =
@@ -98,11 +108,24 @@ const Login = () => {
         "Sai thông tin đăng nhập.";
       setError(msg);
     },
-  });
+  } );
 
   const onSubmit = (data: LoginForm) => {
     setError(null);
-    mutation.mutate(data);
+
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.identifier);
+    const payload = isEmail
+      ? { email: data.identifier, password: data.password }
+      : {
+          // phone: data.identifier.replace(/^0/, "+84"),
+          phone: data.identifier,
+          password: data.password,
+        };
+
+        // debugger
+    console.log("Payload:", payload);
+mutation.mutate(payload);
+
   };
 
   return (
@@ -194,7 +217,7 @@ const Login = () => {
                 {error && <Alert severity="error">{error}</Alert>}
 
                 <Controller
-                  name="email"
+                  name="identifier"
                   control={control}
                   render={({ field }) => (
                     <TextField
@@ -202,8 +225,8 @@ const Login = () => {
                       label="Email or Phone Number"
                       variant="standard"
                       fullWidth
-                      error={!!errors.email}
-                      helperText={errors.email?.message}
+                      error={!!errors.identifier}
+                      helperText={errors.identifier?.message}
                     />
                   )}
                 />

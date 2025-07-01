@@ -18,16 +18,20 @@ import { Controller, useForm } from "react-hook-form";
 import { FcGoogle } from "react-icons/fc";
 import { toast } from "react-toastify";
 import type { AxiosError } from "axios";
+import { useRouter } from "next/navigation";
 
 interface RegisterProps {
   onSuccess?: (data: unknown) => void;
 }
 
 const Register: React.FC<RegisterProps> = ({ onSuccess }) => {
+  const router = useRouter();
+
+
   const {
     control,
     handleSubmit,
-    reset,
+    // reset,
     formState: { errors },
   } = useForm<RegisterFormValues>({
     resolver: yupResolver(schemaRegister),
@@ -45,8 +49,14 @@ const Register: React.FC<RegisterProps> = ({ onSuccess }) => {
   const { mutate, isPending } = useMutation({
     mutationFn: (data: RegisterPayload) => postRegister(data),
     onSuccess: (res) => {
-      toast.success(res?.data?.message || "Registration successful");
-      reset();
+      // toast.success(res?.data?.message || "Registration successful");
+      // reset();
+      toast.success(res?.data?.message || "Đăng ký thành công");
+      const userId = res?.data?.data?.userId;
+      const phone = res?.data?.data?.phone;
+      const email = res?.data?.data?.email;
+      console.log("OTP từ server:", res?.data?.data?.otp); 
+      router.push(`/verify-otp?userId=${userId}&phone=${phone}&email=${email}`);
       onSuccess?.(res?.data?.data);
     },
     onError: (err: unknown) => {
