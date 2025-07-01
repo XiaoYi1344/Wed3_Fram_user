@@ -92,6 +92,8 @@ const VerifyOtpPage = () => {
         setInfo("Mã OTP đã được gửi lại.");
         setResendCount((prev) => prev + 1);
         setAttempts(0);
+        console.log("Mã OTP mới:", data);
+        
         reset();
       } else {
         setError(data.message || "Không thể gửi lại mã OTP.");

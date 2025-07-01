@@ -10,10 +10,10 @@ import {
   setTokens,
   clearTokens,
 } from "../utils/auth";
-import {RegisterPayload } from "@/constant/type-res-api";
+import { LogoutResponse, RegisterPayload } from "@/constant/type-res-api";
 
 const api = axios.create({
-  baseURL: "https://retrieve-ibbn.onrender.com",
+  baseURL: process.env.NEXT_PUBLIC_BASE_URL || "https://retrieve-ibbn.onrender.com",
 });
 
 let isRefreshing = false;
@@ -68,7 +68,7 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const res = await axios.post(`${api.defaults.baseURL}/authentication/refresh-token`, {
+        const res = await axios.post(`${api.defaults.baseURL}/api/authentication/refresh-token`, {
           refreshToken: getRefreshToken(),
         });
 
@@ -94,23 +94,34 @@ api.interceptors.response.use(
   }
 );
 
-export const postRegister = async (data: RegisterPayload) => {
-  return await api.post("/api/authentication/register", data);
-};
+// === API wrappers ===
 
-// axiosInstance.ts
 type LoginPayload = {
   email?: string;
   phone?: string;
   password: string;
 };
 
-// services/axiosInstance.ts
 export const postLogin = async (payload: LoginPayload) => {
   const res = await api.post("/api/authentication/login", payload);
-  return res.data; // ⬅ PHẢI có dòng này
+  return res.data;
 };
 
+export const postRegister = async (data: RegisterPayload) => {
+  return await api.post("/api/authentication/register", data);
+};
+
+export const postLogout = async (refreshToken: string): Promise<LogoutResponse> => {
+  const res = await api.post<LogoutResponse>("/api/authentication/log-out", {
+    refreshToken,
+  });
+  return res.data;
+};
+
+export const getUserProfile = async () => {
+  const res = await api.get("/api/user/get-user"); // `api` tự động thêm token
+  return res.data;
+};
 
 
 

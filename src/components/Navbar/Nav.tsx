@@ -182,8 +182,8 @@ const Nav = ({ openNav }: Props) => {
                 color="warning"
                 sx={{
                   position: "absolute",
-                  top: 0,
-                  right: 0,
+                  top: 10,
+                  right: 8,
                   "& .MuiBadge-badge": {
                     fontSize: "0.6rem",
                     height: 16,

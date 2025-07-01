@@ -68,19 +68,19 @@ const Login = () => {
   >({
     mutationFn: postLogin,
     onSuccess: (data) => {
-      console.log("LOGIN SUCCESS RESPONSE:", data); 
+      console.log("LOGIN SUCCESS RESPONSE:", data);
       // const accessToken =
       //   data.accessToken || data.token || data.jwt || data?.data?.accessToken;
       // const refreshToken = data.refreshToken || data?.data?.refreshToken;
 
       const accessToken = data?.data?.accessToken;
-const refreshToken = data?.data?.refreshToken;
+      const refreshToken = data?.data?.refreshToken;
 
       if (!accessToken || !refreshToken) {
         throw new Error("Không nhận được token.");
       }
 
-      debugger
+      debugger;
       localStorage.setItem("accessToken", accessToken);
       localStorage.setItem("refreshToken", refreshToken);
 
@@ -98,6 +98,7 @@ const refreshToken = data?.data?.refreshToken;
       );
 
       // router.push("/account/profile");
+      console.log("LOGIN SUCCESS RESPONSE");
       router.push("/");
     },
     onError: (err) => {
@@ -108,7 +109,7 @@ const refreshToken = data?.data?.refreshToken;
         "Sai thông tin đăng nhập.";
       setError(msg);
     },
-  } );
+  });
 
   const onSubmit = (data: LoginForm) => {
     setError(null);
@@ -122,10 +123,9 @@ const refreshToken = data?.data?.refreshToken;
           password: data.password,
         };
 
-        // debugger
+    // debugger
     console.log("Payload:", payload);
-mutation.mutate(payload);
-
+    mutation.mutate(payload);
   };
 
   return (
@@ -264,9 +264,11 @@ mutation.mutate(payload);
                   </Button>
 
                   <Link
+                    className="text-nowrap"
                     href="/forgot-password"
                     sx={{
                       flex: 1,
+                      textDecoration: "none",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "end",

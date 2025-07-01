@@ -27,3 +27,9 @@ export interface OtpResponse {
   message?: string;
   otp?: string;
 }
+
+
+export interface LogoutResponse {
+  success: boolean;
+  message?: string;
+}
