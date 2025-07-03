@@ -24,15 +24,15 @@ import { AxiosError } from "axios";
 import { LoginResponse } from "@/constant/type-res-api";
 
 type LoginForm = {
-  identifier: string; // email hoặc phone
+  userName: string; // email hoặc phone
   password: string;
 };
 
 type LoginPayload = {
-  email?: string;
-  phone?: string;
+  userName: string;
   password: string;
 };
+
 
 type DecodedToken = {
   email?: string;
@@ -54,7 +54,7 @@ const Login = () => {
   } = useForm<LoginForm>({
     resolver: yupResolver(schemaLogin),
     defaultValues: {
-      identifier: "",
+      userName: "",
       password: "",
     },
   });
@@ -114,14 +114,10 @@ const Login = () => {
   const onSubmit = (data: LoginForm) => {
     setError(null);
 
-    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.identifier);
-    const payload = isEmail
-      ? { email: data.identifier, password: data.password }
-      : {
-          // phone: data.identifier.replace(/^0/, "+84"),
-          phone: data.identifier,
-          password: data.password,
-        };
+    const payload = {
+      userName: data.userName,
+      password: data.password,
+    };
 
     // debugger
     console.log("Payload:", payload);
@@ -217,7 +213,7 @@ const Login = () => {
                 {error && <Alert severity="error">{error}</Alert>}
 
                 <Controller
-                  name="identifier"
+                  name="userName"
                   control={control}
                   render={({ field }) => (
                     <TextField
@@ -225,8 +221,8 @@ const Login = () => {
                       label="Email or Phone Number"
                       variant="standard"
                       fullWidth
-                      error={!!errors.identifier}
-                      helperText={errors.identifier?.message}
+                      error={!!errors.userName}
+                      helperText={errors.userName?.message}
                     />
                   )}
                 />

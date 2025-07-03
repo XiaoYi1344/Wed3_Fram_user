@@ -60,7 +60,7 @@ const MobileNav = ({ closeNav, showNav }: Props) => {
                       key={item}
                       href={`/category${cat.path}/${encodeURIComponent(item)}`}
                       onClick={closeNav}
-                      legacyBehavior
+                      
                     >
                       <a className="block hover:underline">{item}</a>
                     </Link>

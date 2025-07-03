@@ -1,12 +1,15 @@
 // src/constant/type-res-api.ts
 
 export interface RegisterFormValues {
-  fullName: string;
   userName: string;
-  phone: string;
-  yearOfBirth: number;
   password: string;
   confirmPassword: string;
+  email: string;
+  phone: string;
+  nameCompany: string;
+  city: string;
+  district: string;
+  address: string;
 }
 
 export type RegisterPayload = Omit<RegisterFormValues, "confirmPassword">;

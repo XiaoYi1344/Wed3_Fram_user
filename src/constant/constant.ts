@@ -7,7 +7,6 @@ export const navLinks = [
     label: "Home",
   },
   {
-    // components/About/About
     id: 2,
     url: "/contact",
     label: "Contact",
@@ -36,6 +35,11 @@ export const navLinks = [
     id: 7,
     url: "/checkout",
     label: "CheckOut",
+  },
+  {
+    id: 8,
+    url: "/category",
+    label: "Category",
   },
   
 ];

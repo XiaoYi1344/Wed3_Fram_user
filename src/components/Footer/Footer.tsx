@@ -80,20 +80,20 @@ const Footer = () => {
             Account
           </Typography>
           <Stack spacing={1}>
-            <Link href="/account" passHref legacyBehavior>
+            <Link href="/account" passHref >
               <Typography
                 variant="body2"
-                component="a"
+                // component="a"
                 className="text-white hover:scale-105 hover:text-gray-300 transition-all duration-200"
               >
                 My Account
               </Typography>
             </Link>
             <Stack spacing={0.5} direction="row">
-              <Link href="/login" passHref legacyBehavior>
+              <Link href="/login" passHref >
                 <Typography
                   variant="body2"
-                  component="a"
+                  // component="a"
                   sx={{
                     color: "#fff",
                     transition: "all 0.2s",
@@ -109,10 +109,10 @@ const Footer = () => {
 
               <Typography>/</Typography>
                   
-              <Link href="/signup" passHref legacyBehavior>
+              <Link href="/signup" passHref >
                 <Typography
                   variant="body2"
-                  component="a"
+                  // component="a"
                   sx={{
                     color: "#fff",
                     transition: "all 0.2s",
@@ -127,28 +127,28 @@ const Footer = () => {
               </Link>
             </Stack>
 
-            <Link href="/cart" passHref legacyBehavior>
+            <Link href="/cart" passHref >
               <Typography
                 variant="body2"
-                component="a"
+                // component="a"
                 className="text-white hover:scale-105 hover:text-gray-300 transition-all duration-200"
               >
                 Cart
               </Typography>
             </Link>
-            <Link href="/wishlist" passHref legacyBehavior>
+            <Link href="/wishlist" passHref >
               <Typography
                 variant="body2"
-                component="a"
+                // component="a"
                 className="text-white hover:scale-105 hover:text-gray-300 transition-all duration-200"
               >
                 Wishlist
               </Typography>
             </Link>
-            <Link href="/shop" passHref legacyBehavior>
+            <Link href="/shop" passHref >
               <Typography
                 variant="body2"
-                component="a"
+                // component="a"
                 className="text-white hover:scale-105 hover:text-gray-300 transition-all duration-200"
               >
                 Shop
@@ -163,37 +163,37 @@ const Footer = () => {
             Quick Link
           </Typography>
           <Stack spacing={1}>
-            <Link href="/policy" passHref legacyBehavior>
+            <Link href="/policy" passHref >
               <Typography
                 variant="body2"
-                component="a"
+                // component="a"
                 className="text-white hover:scale-105 hover:text-gray-300 transition-all duration-200"
               >
                 Privacy Policy
               </Typography>
             </Link>
-            <Link href="/term" passHref legacyBehavior>
+            <Link href="/term" passHref >
               <Typography
                 variant="body2"
-                component="a"
+                // component="a"
                 className="text-white hover:scale-105 hover:text-gray-300 transition-all duration-200"
               >
                 Terms Of Use
               </Typography>
             </Link>
-            <Link href="/faq" passHref legacyBehavior>
+            <Link href="/faq" passHref >
               <Typography
                 variant="body2"
-                component="a"
+                // component="a"
                 className="text-white hover:scale-105 hover:text-gray-300 transition-all duration-200"
               >
                 FAQ
               </Typography>
             </Link>
-            <Link href="/contact" passHref legacyBehavior>
+            <Link href="/contact" passHref >
               <Typography
                 variant="body2"
-                component="a"
+                // component="a"
                 className="text-white hover:scale-105 hover:text-gray-300 transition-all duration-200"
               >
                 Contact

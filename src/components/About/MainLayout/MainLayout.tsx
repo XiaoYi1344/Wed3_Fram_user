@@ -9,7 +9,7 @@ const MainLayout: React.FC = () => {
       {/* Breadcrumb */}
       <Stack px={{ xs: 2, md: 14, lg: 20 }}>
         <Breadcrumbs aria-label="breadcrumb">
-          <Link href="/" passHref legacyBehavior>
+          <Link href="/" passHref >
             <Typography
               component="a"
               color="inherit"

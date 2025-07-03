@@ -20,57 +20,50 @@ import { toast } from "react-toastify";
 import type { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 
-interface RegisterProps {
-  onSuccess?: (data: unknown) => void;
-}
-
-const Register: React.FC<RegisterProps> = ({ onSuccess }) => {
+const Register = () => {
   const router = useRouter();
-
 
   const {
     control,
     handleSubmit,
-    // reset,
     formState: { errors },
   } = useForm<RegisterFormValues>({
     resolver: yupResolver(schemaRegister),
     mode: "onSubmit",
     defaultValues: {
-      fullName: "",
       userName: "",
-      phone: "",
-      yearOfBirth: new Date().getFullYear(),
       password: "",
       confirmPassword: "",
+      email: "",
+      phone: "",
+      nameCompany: "",
+      city: "",
+      district: "",
+      address: "",
     },
   });
 
+  // debugger
   const { mutate, isPending } = useMutation({
     mutationFn: (data: RegisterPayload) => postRegister(data),
     onSuccess: (res) => {
-      // toast.success(res?.data?.message || "Registration successful");
-      // reset();
-      toast.success(res?.data?.message || "Đăng ký thành công");
-      const userId = res?.data?.data?.userId;
-      const phone = res?.data?.data?.phone;
-      const email = res?.data?.data?.email;
-      console.log("OTP từ server:", res?.data?.data?.otp); 
-      router.push(`/verify-otp?userId=${userId}&phone=${phone}&email=${email}`);
-      onSuccess?.(res?.data?.data);
+      toast.success(res?.data?.message || "Đăng ký thành công!");
+      // debugger
+      router.push("/login"); // ✅ Không cần xác minh OTP nữa
+
     },
     onError: (err: unknown) => {
       const error = err as AxiosError<{ message?: string }>;
-      toast.error(error?.response?.data?.message || "Registration failed");
+      toast.error(error?.response?.data?.message || "Đăng ký thất bại");
     },
   });
 
   const handleRegister = (formData: RegisterFormValues) => {
-    const { confirmPassword, ...dataToSubmit } = formData;
-    mutate(dataToSubmit);
-    console.log(confirmPassword);
-    
-  };
+  const { confirmPassword, ...dataToSubmit } = formData;
+  console.log("📤 Submitting data:", dataToSubmit, confirmPassword);
+  mutate(dataToSubmit);
+
+};
 
   const renderField = (
     name: keyof RegisterFormValues,
@@ -88,9 +81,6 @@ const Register: React.FC<RegisterProps> = ({ onSuccess }) => {
           variant="standard"
           error={!!errors[name]}
           helperText={errors[name]?.message?.toString() || ""}
-          inputProps={
-            name === "phone" ? { inputMode: "numeric", pattern: "[0-9]*" } : undefined
-          }
         />
       )}
     />
@@ -107,17 +97,14 @@ const Register: React.FC<RegisterProps> = ({ onSuccess }) => {
         backgroundSize: "cover",
         backgroundPosition: "center",
         mt: { xs: 5, md: 30 },
-        // mb: { xs: 5, md: 30 },
         overflowY: "auto",
       }}
     >
-      
       <Box
         display="flex"
         flexDirection={{ xs: "column", md: "row" }}
         width={{ xs: "90%", md: "80%" }}
         mx="auto"
-        pt="20"
         mb="100px"
         boxShadow="0 10px 30px rgba(0,0,0,0.1)"
         borderRadius={{ md: "2rem" }}
@@ -146,7 +133,6 @@ const Register: React.FC<RegisterProps> = ({ onSuccess }) => {
           display="flex"
           justifyContent="center"
           alignItems="center"
-          height="auto"
           sx={{
             background: "rgba(255, 247, 232, 0.3)",
             backdropFilter: "blur(3px)",
@@ -163,10 +149,13 @@ const Register: React.FC<RegisterProps> = ({ onSuccess }) => {
 
             <form onSubmit={handleSubmit(handleRegister)}>
               <Stack spacing={2}>
-                {renderField("fullName", "Full Name")}
                 {renderField("userName", "Username")}
-                {renderField("phone", "Phone Number")}
-                {renderField("yearOfBirth", "Year of Birth")}
+                {renderField("email", "Email")}
+                {renderField("phone", "Phone")}
+                {renderField("nameCompany", "Company Name")}
+                {renderField("city", "City")}
+                {renderField("district", "District")}
+                {renderField("address", "Address")}
                 {renderField("password", "Password", "password")}
                 {renderField("confirmPassword", "Confirm Password", "password")}
 
