@@ -1,10 +1,9 @@
-import ForgotPasswordPage from '@/components/ForgotPasswordPage/ForgotPasswordPage'
-import React from 'react'
+"use client";
 
-const page = () => {
-  return (
-    <ForgotPasswordPage />
-  )
-}
+import ForgotPassword from "@/components/Account/Login/Forgot-password/Forgot-password"; // import từ cùng thư mục
 
-export default page
+const Page = () => {
+  return <ForgotPassword />;
+};
+
+export default Page;

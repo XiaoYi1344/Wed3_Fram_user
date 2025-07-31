@@ -1,39 +1,34 @@
-import React from "react";
-import {
-  Box,
-  Card,
-  CardContent,
-  Grid,
-  Typography,
-} from "@mui/material";
+"use client";
+import React, { useMemo } from "react";
+import { Box, Card, CardContent, Grid, Typography } from "@mui/material";
 import { FaShippingFast } from "react-icons/fa";
 import { TfiHeadphoneAlt } from "react-icons/tfi";
 import { AiOutlineSafety } from "react-icons/ai";
 
-const items = [
-  {
-    icon: <FaShippingFast size={32} />,
-    count: "FREE AND FAST DELIVERY",
-    label: "Free delivery for all orders over $140",
-  },
-  {
-    icon: <TfiHeadphoneAlt size={32} />,
-    count: "24/7 CUSTOMER SERVICE",
-    label: "Friendly 24/7 customer support",
-  },
-  {
-    icon: <AiOutlineSafety size={32} />,
-    count: "MONEY BACK GUARANTEE",
-    label: "We return money within 30 days",
-  },
-];
-
 const Service = () => {
+  const items = useMemo(() => [
+    {
+      icon: <FaShippingFast size={32} />,
+      count: "FREE AND FAST DELIVERY",
+      label: "Free delivery for all orders over $140",
+    },
+    {
+      icon: <TfiHeadphoneAlt size={32} />,
+      count: "24/7 CUSTOMER SERVICE",
+      label: "Friendly 24/7 customer support",
+    },
+    {
+      icon: <AiOutlineSafety size={32} />,
+      count: "MONEY BACK GUARANTEE",
+      label: "We return money within 30 days",
+    },
+  ], []);
+
   return (
     <Box px={{ xs: 2, md: 10 }} py={6}>
       <Grid container spacing={2} justifyContent="center">
         {items.map((item, index) => (
-          <Grid size={{ xs: 12, sm: 6, md: 4}}  key={index}>
+          <Grid key={index} size={{ xs: 12, sm: 6, md: 4 }}>
             <Card
               sx={{
                 height: "100%",

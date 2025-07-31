@@ -25,11 +25,14 @@ const AddressBook = () => {
 
   const fetchAddresses = async () => {
     try {
-      const res = await axios.get("http://192.168.1.100:3001/api/user/get-user", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      const res = await axios.get(
+        "http://192.168.1.100:3001/api/user/get-user",
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
         },
-      });
+      );
 
       const user = res.data.data;
       const userAddress = user.address ? [user.address] : [];
@@ -80,7 +83,7 @@ const AddressBook = () => {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
-        }
+        },
       );
       alert("Updated successfully!");
     } catch (err) {
@@ -100,7 +103,7 @@ const AddressBook = () => {
           <MuiLink underline="hover" color="inherit" href="/">
             Home
           </MuiLink>
-          <Link href="/account/profile" passHref legacyBehavior>
+          <Link href="/account/profile" passHref >
             <MuiLink underline="hover" color="inherit">
               My Account
             </MuiLink>

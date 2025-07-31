@@ -19,22 +19,22 @@ const AnimatedDigitCounter: React.FC<AnimatedDigitCounterProps> = ({
   const [prevValue, setPrevValue] = useState(0);
 
   useEffect(() => {
-  if (containerRef.current) {
-    const startY = -prevValue * DIGIT_HEIGHT;
-    const endY = -value * DIGIT_HEIGHT;
+    if (containerRef.current) {
+      const startY = -prevValue * DIGIT_HEIGHT;
+      const endY = -value * DIGIT_HEIGHT;
 
-    animate(startY, endY, {
-      duration,
-      onUpdate: (latest) => {
-        if (containerRef.current) {
-          containerRef.current.style.transform = `translateY(${latest}px)`;
-        }
-      },
-    });
+      animate(startY, endY, {
+        duration,
+        onUpdate: (latest) => {
+          if (containerRef.current) {
+            containerRef.current.style.transform = `translateY(${latest}px)`;
+          }
+        },
+      });
 
-    setPrevValue(value);
-  }
-}, [value, duration, prevValue]); // ✅ thêm prevValue
+      setPrevValue(value);
+    }
+  }, [value, duration, prevValue]); // ✅ thêm prevValue
 
   return (
     <div
@@ -49,14 +49,8 @@ const AnimatedDigitCounter: React.FC<AnimatedDigitCounterProps> = ({
         {[...Array(10)].map((_, i) => (
           <div
             key={i}
-            style={{
-              height: DIGIT_HEIGHT,
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              fontSize: "32px",
-              fontWeight: "bold",
-            }}
+            className="flex justify-center items-center font-bold text-[18px] md:text-[35px]"
+            style={{ height: DIGIT_HEIGHT }}
           >
             {i}
           </div>

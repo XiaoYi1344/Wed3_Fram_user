@@ -1,134 +1,64 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import AnimatedNumberRolling from "../../AnimatedNumberRolling";
 import { Box, Typography } from "@mui/material";
+import AnimatedNumberRolling from "../../AnimatedNumberRolling";
 
-interface SaleDay {
-  date: string; // "YYYY-MM-DD"
-  startTime: string; // "HH:mm:ss"
-  endTime: string; // "HH:mm:ss"
+export interface SaleDay {
+  date: string; // YYYY-MM-DD
+  startTime: string; // HH:mm:ss
+  endTime: string;   // HH:mm:ss
+  title?: string;
 }
 
-interface Countdown {
-  days: number;
-  hours: number;
-  minutes: number;
-  seconds: number;
-}
-
-interface Props {
-  saleDays: SaleDay[];
-}
-
-const calculateCountdown = (target: Date | null): Countdown => {
-  const now = new Date().getTime();
-  const targetTime = target?.getTime() ?? now;
-  const distance = targetTime - now;
+const getCountdown = (target: Date | null) => {
+  if (!target) return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+  const diff = target.getTime() - new Date().getTime();
+  const clamp = (v: number) => (v > 0 ? v : 0);
 
   return {
-    days: Math.max(0, Math.floor(distance / (1000 * 60 * 60 * 24))),
-    hours: Math.max(0, Math.floor((distance / (1000 * 60 * 60)) % 24)),
-    minutes: Math.max(0, Math.floor((distance / 1000 / 60) % 60)),
-    seconds: Math.max(0, Math.floor((distance / 1000) % 60)),
+    days: clamp(Math.floor(diff / 86400000)),
+    hours: clamp(Math.floor((diff % 86400000) / 3600000)),
+    minutes: clamp(Math.floor((diff % 3600000) / 60000)),
+    seconds: clamp(Math.floor((diff % 60000) / 1000)),
   };
 };
 
-const SmartCountdownSale: React.FC<Props> = ({ saleDays }) => {
+export default function SmartCountdownSale({ saleDays }: { saleDays: SaleDay[] }) {
   const { label, target } = useMemo(() => {
-    const now = new Date(); // moved inside useMemo
-    const nowTime = now.getTime();
-
-    for (const sale of saleDays) {
-      const start = new Date(`${sale.date}T${sale.startTime}`);
-      const end = new Date(`${sale.date}T${sale.endTime}`);
-
-      if (nowTime < start.getTime()) {
-        return { label: "Sale Starts In", target: start };
-      }
-
-      if (nowTime >= start.getTime() && nowTime < end.getTime()) {
-        return { label: "Sale Ends In", target: end };
-      }
+    const now = Date.now();
+    for (const sd of saleDays) {
+      const s = new Date(`${sd.date}T${sd.startTime}`);
+      const e = new Date(`${sd.date}T${sd.endTime}`);
+      if (now < s.getTime()) return { label: "Sale Starts In", target: s };
+      if (now >= s.getTime() && now < e.getTime()) return { label: "Sale Ends In", target: e };
     }
-
     return { label: "", target: null };
-  }, [saleDays]); // ✅ removed 'now' from deps
+  }, [saleDays]);
 
-  const [countdown, setCountdown] = useState<Countdown>(() =>
-    calculateCountdown(target)
-  );
+  const [cd, setCd] = useState(getCountdown(target));
 
   useEffect(() => {
     if (!target) return;
-
-    const timer = setInterval(() => {
-      setCountdown(calculateCountdown(target));
-    }, 1000);
-
-    return () => clearInterval(timer);
+    const iv = setInterval(() => setCd(getCountdown(target)), 1000);
+    return () => clearInterval(iv);
   }, [target]);
 
-  const timeUnits = [
-    { label: "Days", value: countdown.days },
-    { label: "Hours", value: countdown.hours },
-    { label: "Minutes", value: countdown.minutes },
-    { label: "Seconds", value: countdown.seconds },
-  ];
+  if (!label || !target) return <Typography>No active sale</Typography>;
 
   return (
-    <Box display="flex" flexDirection="column" alignItems="center">
-      {target ? (
-        <>
-          <Typography
-            variant="h6"
-            fontWeight="bold"
-            gutterBottom
-            fontSize={{ sm: 15, md: 20 }}
-          >
-            ⏰ {label}
-          </Typography>
-          <Box display="flex" alignItems="center" gap={1} mx="50%">
-            {timeUnits.map((unit, index) => (
-              <React.Fragment key={unit.label}>
-                <Box textAlign="center">
-                  <Typography
-                    variant="caption"
-                    fontWeight="bold"
-                    fontSize={{ sm: 10, md: 15 }}
-                  >
-                    {unit.label}
-                  </Typography>
-                  <Typography
-                    variant="h5"
-                    fontWeight="bold"
-                    sx={{
-                      fontSize: { xs: 20, sm: 25, md: 100 }, // đổi font size số
-                      fontFamily: "monospace", // ví dụ: số rõ ràng hơn
-                      lineHeight: 1.2,
-                    }}
-                  >
-                    <AnimatedNumberRolling number={unit.value} />
-                  </Typography>
-                </Box>
-                {index < timeUnits.length - 1 && (
-                  <Typography
-                    variant="h5"
-                    fontWeight="bold"
-                    sx={{ color: "#ff8d2f", mx: 0.5, mt: 3 }}
-                  >
-                    :
-                  </Typography>
-                )}
-              </React.Fragment>
-            ))}
+    <Box textAlign="center" py={2}>
+      <Typography variant="h6">⏰ {label}</Typography>
+      <Box display="flex" justifyContent="center" gap={2}>
+        {Object.entries(cd).map(([unit, value]) => (
+          <Box key={unit} textAlign="center">
+            <Typography variant="caption" fontWeight="bold">
+              {unit}
+            </Typography>
+            <AnimatedNumberRolling number={value} />
           </Box>
-        </>
-      ) : (
-        <Typography>No active or upcoming sales</Typography>
-      )}
+        ))}
+      </Box>
     </Box>
   );
-};
-
-export default SmartCountdownSale;
+}

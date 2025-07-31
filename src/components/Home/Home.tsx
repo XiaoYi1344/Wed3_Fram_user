@@ -1,46 +1,44 @@
-"use client"
+// app/components/Home/index.tsx
+"use client";
 
-import React, { useEffect } from 'react'
-import MainBar from './MainBar/MainBar'
-import FlashSales from './Sale/FlashSale'
-import Categories from './Category/Categories'
-import BestSale from './BestSale/BestSale'
-import Ad from './Ad/Ad'
-import Product from './Product/Product'
-import Featuted from './Featured/Featuted'
-import Service from '../About/Service/Service'
+import dynamic from "next/dynamic";
+import { useEffect } from "react";
+import { Stack } from "@mui/material";
 import AOS from "aos";
 import "aos/dist/aos.css";
-const Home = () => {
 
+const MainBar = dynamic(() => import("./MainBar/MainBar"));
+const FlashSales = dynamic(() => import("./Sale/MockFlashSale"));
+const Categories = dynamic(() => import("./Category/Categories"));
+const BestSale = dynamic(() => import("./BestSale/BestSale"));
+const Ad = dynamic(() => import("./Ad/Ad"));
+const ProductGrid = dynamic(() => import("./Product/ProductGrid"));
+const Service = dynamic(() => import("../About/Service/Service"));
+
+export default function Home() {
   useEffect(() => {
-  AOS.init({
-    duration: 1000,
-    easing: "ease-in-out",
-    mirror: true,
-    once: false,
-    anchorPlacement: "top-bottom",
-  });
-}, []);
-
+    AOS.init({
+      duration: 600,
+      easing: "ease-out",
+      once: true,
+      anchorPlacement: "top-bottom",
+    });
+  }, []);
 
   return (
     <div>
+      <Stack mt={10}>
         <MainBar />
-        <FlashSales />
-        <hr className="mx-18" />
-        <Categories />
-        <hr className="mx-18" />
-        <BestSale />
-        <hr className="mx-18" />
-        <Ad />
-      
-        <Product />
-
-        <Featuted />
-        <Service />
+      </Stack>
+      <FlashSales />
+      <hr className="mx-18" />
+      <Categories />
+      <hr className="mx-18" />
+      <BestSale />
+      <hr className="mx-18" />
+      <Ad />
+      <ProductGrid />
+      <Service />
     </div>
-  )
+  );
 }
-
-export default Home

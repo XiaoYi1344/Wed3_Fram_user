@@ -1,10 +1,8 @@
-import Selling from '@/components/Home/BestSale/Selling'
-import React from 'react'
+import Selling from "@/components/Home/BestSale/Selling";
+import React from "react";
 
 const page = () => {
-  return (
-    <Selling />
-  )
-}
+  return <Selling />;
+};
 
-export default page
+export default page;

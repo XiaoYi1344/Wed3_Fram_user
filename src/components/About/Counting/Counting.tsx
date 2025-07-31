@@ -1,52 +1,47 @@
-import React from "react";
-import {
-  Box,
-  Card,
-  CardContent,
-  Grid,
-  Typography,
-} from "@mui/material";
+"use client";
+import React, { useMemo } from "react";
+import { Box, Card, CardContent, Grid, Typography } from "@mui/material";
 import { CiShop } from "react-icons/ci";
 import { RiMoneyDollarCircleLine } from "react-icons/ri";
 import { MdOutlineShoppingBag } from "react-icons/md";
 import { TbMoneybag } from "react-icons/tb";
 
-const items = [
-  {
-    icon: <CiShop size={32} />,
-    count: "10.5k",
-    label: "Sellers active on our site",
-  },
-  {
-    icon: <RiMoneyDollarCircleLine size={32} />,
-    count: "33k",
-    label: "Monthly Product Sale",
-  },
-  {
-    icon: <MdOutlineShoppingBag size={32} />,
-    count: "45.5k",
-    label: "Customers active on our site",
-  },
-  {
-    icon: <TbMoneybag size={32} />,
-    count: "25k",
-    label: "Annual gross sale on our site",
-  },
-];
-
 const Counting = () => {
+  const items = useMemo(() => [
+    {
+      icon: <CiShop size={32} />,
+      count: "10.5k",
+      label: "Sellers active on our site",
+    },
+    {
+      icon: <RiMoneyDollarCircleLine size={32} />,
+      count: "33k",
+      label: "Monthly Product Sale",
+    },
+    {
+      icon: <MdOutlineShoppingBag size={32} />,
+      count: "45.5k",
+      label: "Customers active on our site",
+    },
+    {
+      icon: <TbMoneybag size={32} />,
+      count: "25k",
+      label: "Annual gross sale on our site",
+    },
+  ], []);
+
   return (
-    <Box px={{ xs: 2, md: 10 }} py={6} >
+    <Box px={{ xs: 2, md: 10 }} py={6}>
       <Grid container spacing={4}>
         {items.map((item, index) => (
-          <Grid size={{ xs: 12, sm: 6, md: 3}} key={index}>
+          <Grid key={index} size={{ xs: 12, sm: 6, md: 3 }}>
             <Card
               sx={{
                 height: "100%",
                 borderRadius: 4,
                 transition: "0.3s",
                 "&:hover": {
-                  backgroundColor: "#f97316", // Card bg on hover
+                  backgroundColor: "#f97316",
                 },
                 "&:hover .iconBox": {
                   backgroundColor: "white",
@@ -77,7 +72,7 @@ const Counting = () => {
                     mb: 2,
                     borderRadius: "50%",
                     backgroundColor: "black",
-                    border: "8px solid #d1d5db", // gray-300
+                    border: "8px solid #d1d5db",
                     color: "white",
                     display: "flex",
                     alignItems: "center",

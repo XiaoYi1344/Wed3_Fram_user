@@ -2,7 +2,6 @@ import * as yup from "yup";
 import { RegisterFormValues } from "@/constant/type-res-api";
 
 export const schemaRegister: yup.ObjectSchema<RegisterFormValues> = yup.object({
-
   userName: yup.string().required("Username is required"),
 
   email: yup
@@ -21,9 +20,9 @@ export const schemaRegister: yup.ObjectSchema<RegisterFormValues> = yup.object({
     .required("Password is required"),
 
   confirmPassword: yup
-    .string()
-    .oneOf([yup.ref("password")], "Passwords must match")
-    .required("Confirm password is required"),
+  .string()
+  .oneOf([yup.ref("password")], "Mật khẩu không khớp")
+  .required("Vui lòng xác nhận mật khẩu"),
 
   nameCompany: yup.string().required("Company name is required"),
 
@@ -32,6 +31,19 @@ export const schemaRegister: yup.ObjectSchema<RegisterFormValues> = yup.object({
   district: yup.string().required("District is required"),
 
   address: yup.string().required("Address is required"),
+
+  gender: yup
+    .mixed<"Male" | "Female" | "Other">()
+    .oneOf(["Male", "Female", "Other"])
+    .optional(),
+
+  dateOfBirth: yup
+    .string()
+    .matches(
+      /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/,
+      "Định dạng ngày sinh không hợp lệ (dd/MM/yyyy)"
+    )
+    .optional(),
 });
 
 // ✅ Login schema
@@ -45,7 +57,6 @@ export const schemaLogin = yup.object({
     .required("Mật khẩu là bắt buộc")
     .min(6, "Mật khẩu phải có ít nhất 6 ký tự"),
 });
-
 
 export const schemaOtp = yup.object({
   otp: yup

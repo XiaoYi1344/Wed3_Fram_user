@@ -1,27 +1,61 @@
-// app/best-selling/page.tsx
 "use client";
 
-import React from "react";
-import {
-  Box,
-  Typography,
-  Grid,
-  Rating,
-  CardMedia,
-
-} from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { Box, Typography, Grid, Rating, CardMedia } from "@mui/material";
 import { Card, CardContent } from "@/components/ui/card";
-import { flashSales, products } from "@/data";
+import { Product, FlashSale } from "@/constant/type-res-api";
+import {
+  fetchAllProducts,
+  // fetchFlashSales,
+} from "@/services/axiosInstance";
 
-const Selling = () => {
-  const productMap = Object.fromEntries(products.map((p) => [p.id, p]));
+import { fetchFakeFlashSales } from "../Sale/mock/fakeFlashSales";
+const BestSelling = () => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [flashSales, setFlashSales] = useState<FlashSale[]>([]);
 
-  const allActiveSales = flashSales
-    .filter((item) => item.isActive)
-    .map((item) => ({
-      ...item,
-      ...productMap[item.productId],
-    }));
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [productData, flashSaleData] = await Promise.all([
+          fetchAllProducts(),
+          fetchFakeFlashSales(),
+        ]);
+        setProducts(productData);
+        setFlashSales(flashSaleData);
+      } catch (error) {
+        console.error("Error loading best selling data:", error);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  const productMap: Record<string, Product> = Object.fromEntries(
+    products.map((p) => [p.id, p])
+  );
+
+  const activeSales = flashSales
+    .filter((sale) => sale.isActive)
+    .map((sale) => {
+      const product = productMap[sale.productId];
+
+      const avgRating =
+        product?.reviews && product.reviews.length > 0
+          ? product.reviews.reduce((sum, r) => sum + r.rating, 0) /
+            product.reviews.length
+          : 0;
+
+      return {
+        id: sale.id,
+        title: product?.name || "Unknown Product",
+        bannerImage: sale.bannerImage || product?.imageUrl?.[0] || "",
+        newPrice: sale.flashPrice,
+        oldPrice: product?.price || 0,
+        rating: avgRating,
+        reviews: product?.reviews?.length || 0,
+      };
+    });
 
   return (
     <Box px={8} py={12}>
@@ -30,8 +64,8 @@ const Selling = () => {
       </Typography>
 
       <Grid container spacing={3}>
-        {allActiveSales.map((item) => (
-          <Grid size={{xs:12, sm: 6, md: 4, lg: 3}} key={item.id}>
+        {activeSales.map((item) => (
+          <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3}} key={item.id}>
             <Card>
               <CardMedia
                 component="img"
@@ -67,4 +101,4 @@ const Selling = () => {
   );
 };
 
-export default Selling;
+export default BestSelling;

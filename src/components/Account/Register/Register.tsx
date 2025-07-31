@@ -19,9 +19,17 @@ import { FcGoogle } from "react-icons/fc";
 import { toast } from "react-toastify";
 import type { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
+import AOS from "aos";
+import { useEffect } from "react";
+import "aos/dist/aos.css";
+import { motion } from "framer-motion";
 
 const Register = () => {
   const router = useRouter();
+
+  useEffect(() => {
+    AOS.init({ duration: 800, once: true });
+  }, []);
 
   const {
     control,
@@ -43,14 +51,11 @@ const Register = () => {
     },
   });
 
-  // debugger
   const { mutate, isPending } = useMutation({
     mutationFn: (data: RegisterPayload) => postRegister(data),
     onSuccess: (res) => {
-      toast.success(res?.data?.message || "Đăng ký thành công!");
-      // debugger
-      router.push("/login"); // ✅ Không cần xác minh OTP nữa
-
+      toast.success(res?.message || "Đăng ký thành công!");
+      router.push("/login");
     },
     onError: (err: unknown) => {
       const error = err as AxiosError<{ message?: string }>;
@@ -58,12 +63,12 @@ const Register = () => {
     },
   });
 
-  const handleRegister = (formData: RegisterFormValues) => {
-  const { confirmPassword, ...dataToSubmit } = formData;
-  console.log("📤 Submitting data:", dataToSubmit, confirmPassword);
-  mutate(dataToSubmit);
+  const handleRegister = (data: RegisterFormValues) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+const { confirmPassword, ...payload } = data;
+mutate(payload);
 
-};
+  };
 
   const renderField = (
     name: keyof RegisterFormValues,
@@ -93,7 +98,7 @@ const Register = () => {
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
-        backgroundImage: 'url("/img/b.png")',
+        backgroundImage: 'url("/img/Form1.webp")',
         backgroundSize: "cover",
         backgroundPosition: "center",
         mt: { xs: 5, md: 30 },
@@ -118,9 +123,10 @@ const Register = () => {
           justifyContent="center"
           alignItems="center"
           height="600"
+          data-aos="fade-right"
         >
           <Image
-            src="/img/Form1.png"
+            src="/img/Form1.webp"
             alt="Register Illustration"
             width={400}
             height={400}
@@ -128,18 +134,27 @@ const Register = () => {
           />
         </Box>
 
-        <Box
-          flex={{ md: "1 1 60%" }}
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          sx={{
-            background: "rgba(255, 247, 232, 0.3)",
-            backdropFilter: "blur(3px)",
-            border: "1px solid rgba(255,255,255,0.2)",
+        <motion.div
+          style={{
+            flex: "1 1 60%",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
           }}
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
         >
-          <Box maxWidth={500} width="100%" p={6}>
+          <Box
+            maxWidth={500}
+            width="100%"
+            p={6}
+            sx={{
+              background: "rgba(255, 247, 232, 0.3)",
+              backdropFilter: "blur(3px)",
+              border: "1px solid rgba(255,255,255,0.2)",
+            }}
+          >
             <Typography variant="h5" fontWeight={700} fontSize={32} mb={1}>
               Create an Account
             </Typography>
@@ -189,7 +204,7 @@ const Register = () => {
               </Stack>
             </form>
           </Box>
-        </Box>
+        </motion.div>
       </Box>
     </Box>
   );

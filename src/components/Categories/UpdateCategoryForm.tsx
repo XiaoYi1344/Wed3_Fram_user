@@ -15,7 +15,7 @@ interface UpdateCategoryFormProps {
   onUpdated: () => void;
 }
 
-const API_URL = "http://192.168.1.16:3000/api/category";
+const API_URL = "http://192.168.1.31:3000/api/category";
 
 const UpdateCategoryForm: React.FC<UpdateCategoryFormProps> = ({
   selectedCategory,
@@ -31,36 +31,40 @@ const UpdateCategoryForm: React.FC<UpdateCategoryFormProps> = ({
   }, [selectedCategory]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (!form.name.trim()) {
-    setError("Tên danh mục không được để trống");
-    return;
-  }
-
-  try {
-    if (form.id !== undefined && form.id !== null) {
-      // PUT với id trong URL (nếu backend yêu cầu vậy)
-      await axios.put(`${API_URL}/${form.id}`, {
-        name: form.name,
-        description: form.description,
-      });
-    } else {
-      setError("Thiếu ID để cập nhật danh mục");
+    if (!form.name.trim()) {
+      setError("Tên danh mục không được để trống");
       return;
     }
 
-    onUpdated();
-  } catch (err) {
-    console.error("Lỗi khi cập nhật:", err);
-    setError("Cập nhật thất bại");
-  }
-};
+    try {
+      if (form.id !== undefined && form.id !== null) {
+        // Gửi ID trong body như backend yêu cầu
+        await axios.put(API_URL, {
+          id: form.id,
+          name: form.name,
+          description: form.description,
+        });
+      } else {
+        setError("Thiếu ID để cập nhật danh mục");
+        return;
+      }
 
+      onUpdated();
+    } catch (err) {
+      console.error("Lỗi khi cập nhật:", err);
+      setError("Cập nhật thất bại");
+    }
+  };
 
   return (
     <Box component="form" onSubmit={handleSubmit}>
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
 
       <TextField
         label="Tên danh mục"

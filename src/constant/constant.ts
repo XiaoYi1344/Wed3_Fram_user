@@ -21,25 +21,29 @@ export const navLinks = [
     url: "/signup",
     label: "Sign Up",
   },
-  {
-    id: 5,
-    url: "/verify-otp",
-    label: "OTP",
-  },
-  {
-    id: 6,
-    url: "/cart",
-    label: "Cart",
-  },
-  {
-    id: 7,
-    url: "/checkout",
-    label: "CheckOut",
-  },
-  {
-    id: 8,
-    url: "/category",
-    label: "Category",
-  },
-  
+  // {
+  //   id: 5,
+  //   url: "/verify-otp",
+  //   label: "OTP",
+  // },
+  // {
+  //   id: 6,
+  //   url: "/cart",
+  //   label: "Cart",
+  // },
+  // {
+  //   id: 7,
+  //   url: "/checkout",
+  //   label: "CheckOut",
+  // },
+  // {
+  //   id: 8,
+  //   url: "/logout",
+  //   label: "Logout",
+  // },
+  // {
+  //   id: 9,
+  //   url: "/change-password",
+  //   label: "Change Password",
+  // },
 ];

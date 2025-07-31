@@ -1,6 +1,13 @@
 // pages/forgot-password/page.tsx
 "use client";
-import { Box, TextField, Typography, Button, Stack, Alert } from "@mui/material";
+import {
+  Box,
+  TextField,
+  Typography,
+  Button,
+  Stack,
+  Alert,
+} from "@mui/material";
 import { useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
@@ -25,7 +32,7 @@ export default function ForgotPasswordPage() {
         "https://d6b7-2a09-bac5-d46b-101e-00-19b-f.ngrok-free.app/api/user/forgot-password",
         emailOrPhone.includes("@")
           ? { email: emailOrPhone }
-          : { phone: emailOrPhone }
+          : { phone: emailOrPhone },
       );
 
       if (res.data.success) {
@@ -37,7 +44,7 @@ export default function ForgotPasswordPage() {
         setError(res.data.message);
       }
     } catch (err) {
-        console.log(err);
+      console.log(err);
       setError("Something went wrong. Please try again.");
     }
   };
@@ -64,6 +71,13 @@ export default function ForgotPasswordPage() {
 
         <Button variant="contained" color="warning" onClick={handleSendOtp}>
           Send OTP
+        </Button>
+        <Button
+          variant="contained"
+          color="info"
+          onClick={() => router.push("/change-password")}
+        >
+          Change Password
         </Button>
       </Stack>
     </Box>

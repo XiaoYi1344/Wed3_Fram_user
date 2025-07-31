@@ -21,7 +21,7 @@ const AnimatedNumberRolling: React.FC<AnimatedNumberRollingProps> = ({
 
   return (
     <Box>
-      <div style={{ display: "flex", gap: 4 }}>
+      <div style={{ display: "flex", gap: 4}}>
         {digits.map((digit, idx) => (
           <AnimatedDigitCounter key={idx} value={digit} duration={duration} />
         ))}

@@ -1,10 +1,8 @@
-import Categories from '@/components/Categories/Category'
-import React from 'react'
+import Categories from "@/components/Categories/Category";
+import React from "react";
 
 const page = () => {
-  return (
-    <Categories />
-  )
-}
+  return <Categories />;
+};
 
-export default page
+export default page;

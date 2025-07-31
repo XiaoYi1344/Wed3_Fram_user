@@ -1,21 +1,16 @@
 "use client";
 
-import { CartProvider } from "@/context/CartContext";
-import {
-  QueryClient,
-  QueryClientProvider as QueryClientProviders,
-} from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import React from "react";
 
 const queryClient = new QueryClient();
 
 export default function ClientProvider({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <QueryClientProviders client={queryClient}>
-      <CartProvider>{children}</CartProvider>
-    </QueryClientProviders>
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 }

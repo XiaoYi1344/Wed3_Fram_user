@@ -21,7 +21,8 @@ const dropIn = {
   },
 };
 
-interface Props extends React.ComponentPropsWithoutRef<typeof DropdownMenuContent> {
+interface Props
+  extends React.ComponentPropsWithoutRef<typeof DropdownMenuContent> {
   children: React.ReactNode;
 }
 
@@ -47,7 +48,7 @@ export const AnimatedDropdownContent = React.forwardRef<HTMLDivElement, Props>(
         </motion.div>
       </DropdownMenuContent>
     </DropdownMenuPortal>
-  )
+  ),
 );
 
 AnimatedDropdownContent.displayName = "AnimatedDropdownContent";

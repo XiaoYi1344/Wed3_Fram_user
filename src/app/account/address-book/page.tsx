@@ -1,10 +1,8 @@
-import AddressBook from '@/components/Book/Book'
-import React from 'react'
+import AddressBook from "@/components/Book/Book";
+import React from "react";
 
 const page = () => {
-  return (
-    <AddressBook />
-  )
-}
+  return <AddressBook />;
+};
 
-export default page
+export default page;

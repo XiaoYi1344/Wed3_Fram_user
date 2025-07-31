@@ -1,10 +1,8 @@
-import Account from '@/components/Account/Account'
-import React from 'react'
+import Account from "@/components/Account/Account";
+import React from "react";
 
 const page = () => {
-  return (
-    <Account />
-  )
-}
+  return <Account />;
+};
 
-export default page
+export default page;

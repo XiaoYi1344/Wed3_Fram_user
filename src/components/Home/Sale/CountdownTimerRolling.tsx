@@ -1,82 +1,38 @@
-// components/CountdownTimer.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
 import { Box, Typography } from "@mui/material";
 import AnimatedNumberRolling from "../../AnimatedNumberRolling";
 
-interface Countdown {
-  days: number;
-  hours: number;
-  minutes: number;
-  seconds: number;
-}
-
-const calculateCountdown = (target: Date | null): Countdown => {
-  const now = new Date().getTime();
-  const targetTime = target?.getTime() ?? now;
-  const distance = targetTime - now;
-
+const getCountdown = (t: Date | null) => {
+  if (!t) return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+  const d = t.getTime() - Date.now();
   return {
-    days: Math.max(0, Math.floor(distance / (1000 * 60 * 60 * 24))),
-    hours: Math.max(0, Math.floor((distance / (1000 * 60 * 60)) % 24)),
-    minutes: Math.max(0, Math.floor((distance / 1000 / 60) % 60)),
-    seconds: Math.max(0, Math.floor((distance / 1000) % 60)),
+    days: Math.max(0, Math.floor(d / 86400000)),
+    hours: Math.max(0, Math.floor((d % 86400000) / 3600000)),
+    minutes: Math.max(0, Math.floor((d % 3600000) / 60000)),
+    seconds: Math.max(0, Math.floor((d % 60000) / 1000)),
   };
 };
 
-interface Props {
-  target: Date | null;
-}
-
-const CountdownTimer: React.FC<Props> = ({ target }) => {
-  const [countdown, setCountdown] = useState<Countdown>({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0,
-  });
+export default function CountdownTimer({ target }: { target: Date | null }) {
+  const [cd, setCd] = useState(getCountdown(target));
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCountdown(calculateCountdown(target));
-    }, 1000);
-
-    return () => clearInterval(timer);
+    const iv = setInterval(() => setCd(getCountdown(target)), 1000);
+    return () => clearInterval(iv);
   }, [target]);
 
-  const timeUnits = [
-    { label: "Days", value: countdown.days },
-    { label: "Hours", value: countdown.hours },
-    { label: "Minutes", value: countdown.minutes },
-    { label: "Seconds", value: countdown.seconds },
-  ];
-
   return (
-    <Box display="flex" alignItems="center" gap={1}>
-      {timeUnits.map((unit, index) => (
-        <React.Fragment key={unit.label}>
-          <Box textAlign="center">
-            <Typography variant="caption" fontWeight="bold">
-              {unit.label}
-            </Typography>
-            <Typography variant="h5" fontWeight="bold" sx={{ lineHeight: 1 }}>
-              <AnimatedNumberRolling number={unit.value} />
-            </Typography>
-          </Box>
-          {index < timeUnits.length - 1 && (
-            <Typography
-              variant="h5"
-              fontWeight="bold"
-              sx={{ color: "#ff8d2f", mx: 0.5, mt: 3 }}
-            >
-              :
-            </Typography>
-          )}
-        </React.Fragment>
+    <Box display="flex" justifyContent="center" gap={2}>
+      {Object.entries(cd).map(([unit, value]) => (
+        <Box key={unit} textAlign="center">
+          <Typography variant="caption" textTransform="capitalize">
+            {unit}
+          </Typography>
+          <AnimatedNumberRolling number={value} />
+        </Box>
       ))}
     </Box>
   );
-};
-
-export default CountdownTimer;
+}

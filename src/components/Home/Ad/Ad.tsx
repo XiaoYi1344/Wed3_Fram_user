@@ -3,13 +3,12 @@
 import React, { useEffect, useState } from "react";
 import { Box, Typography, Button } from "@mui/material";
 import Image from "next/image";
+import { fetchFakeFlashSales } from "../Sale/mock/fakeFlashSales";
 import AnimatedNumberRolling from "../../AnimatedNumberRolling";
+import { FlashSale, Product } from "@/constant/type-res-api";
 
-import { flashSales, productSales, FlashSaleWithProduct } from "@/data";
+type FlashSaleWithProduct = FlashSale & { product: Product };
 
-
-
-// Helper lấy thời gian còn lại
 const getTimeDiff = (endDate: Date) => {
   const now = new Date().getTime();
   const end = new Date(endDate).getTime();
@@ -22,124 +21,109 @@ const getTimeDiff = (endDate: Date) => {
 
   return { days, hours, minutes, seconds };
 };
-import { Product, ProductSale } from "@/data"; // giả sử dùng alias
-
-function convertProductSaleToProduct(p: ProductSale): Product {
-  return {
-    id: p.id,
-    title: p.title,
-    image: p.image,
-    oldPrice: p.oldPrice,
-    newPrice: p.newPrice,
-    discount: p.discount,
-    rating: p.rating,
-    reviews: p.reviews,
-    stock: p.stock ?? 0, // fallback để tránh lỗi
-    isOnSale: p.isOnSale ?? false,
-    isInStock: p.stock !== undefined && p.stock > 0,
-    description: p.description ?? "",
-    categories: p.categories ?? [],
-    saleDay: p.saleDay,
-    colours: [], // tùy bạn muốn default gì
-    sizes: [],
-  };
-}
-
 
 const CountdownSaleBanner: React.FC = () => {
   const [flashSale, setFlashSale] = useState<FlashSaleWithProduct | null>(null);
   const [timeLeft, setTimeLeft] = useState(() => getTimeDiff(new Date()));
 
   useEffect(() => {
-    const now = new Date();
-    
-    // Lọc ra flash sale đang active và trong thời gian hiện tại
-    const currentFlashSales = flashSales
-      .filter(f =>
-        f.isActive &&
-        new Date(f.startTime) <= now &&
-        new Date(f.endTime) > now
-      )
-      .sort((a, b) => a.priority - b.priority);
+    const fetchCurrentFlashSale = async () => {
+      try {
+        const res = await fetchFakeFlashSales();
+        const now = new Date();
 
-    if (currentFlashSales.length > 0) {
-      const topSale = currentFlashSales[0];
-      const product = productSales.find(p => p.id === topSale.productId);
+        const activeSales = res
+          .filter(
+            (f) =>
+              f.isActive &&
+              new Date(f.startTime) <= now &&
+              new Date(f.endTime) > now
+          )
+          .sort((a, b) => a.priority - b.priority);
 
-      if (product) {
-  setFlashSale({
-    ...topSale,
-    product: convertProductSaleToProduct(product),
-  });
+        if (activeSales.length > 0) {
+          const topSale = activeSales[0];
+          setFlashSale(topSale);
+          setTimeLeft(getTimeDiff(new Date(topSale.endTime)));
+        }
+      } catch (error) {
+        console.error("Error fetching flash sales:", error);
+      }
+    };
 
-  setTimeLeft(getTimeDiff(new Date(topSale.endTime)));
-}
-
-    }
+    fetchCurrentFlashSale();
   }, []);
 
-  // Cập nhật đồng hồ đếm ngược
   useEffect(() => {
     if (!flashSale) return;
-
     const interval = setInterval(() => {
       setTimeLeft(getTimeDiff(new Date(flashSale.endTime)));
     }, 1000);
-
     return () => clearInterval(interval);
   }, [flashSale]);
 
-  if (!flashSale) return null; // Nếu không có FlashSale đang diễn ra
+  if (!flashSale) return null;
 
   return (
     <Box
       sx={{
-        bgcolor: "#00c853",
-        borderRadius: 3,
+        borderRadius: 4,
         overflow: "hidden",
         display: "flex",
         flexDirection: { xs: "column", md: "row" },
-        p: 4,
+        p: { xs: 3, md: 5 },
+        mt: 6,
+        mx: 3,
+        background: "linear-gradient(135deg, #ff6f61, #ff8f00)",
         color: "#fff",
         alignItems: "center",
-        justifyContent: "space-between",
+        boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
       }}
     >
-      {/* Bên trái */}
+      {/* Left Content */}
       <Box flex={1}>
-        <Typography variant="subtitle2" sx={{ color: "#c8facc", mb: 1 }}>
-          Flash Sale
+        <Typography variant="subtitle1" sx={{ opacity: 0.9 }}>
+          🔥 Đang diễn ra
         </Typography>
 
-        <Typography variant="h4" sx={{ fontWeight: "bold", mb: 3 }}>
-          {flashSale.product.title}
+        <Typography
+          variant="h4"
+          fontWeight="bold"
+          mt={1}
+          mb={3}
+          sx={{ lineHeight: 1.2 }}
+        >
+          {flashSale.product.name}
         </Typography>
 
-        <Box display="flex" gap={2} mb={3}>
-          {["Days", "Hours", "Minutes", "Seconds"].map((label, index) => {
-            const value = [timeLeft.days, timeLeft.hours, timeLeft.minutes, timeLeft.seconds][index];
+        <Box display="flex" gap={2} mb={4} flexWrap="wrap">
+          {["Ngày", "Giờ", "Phút", "Giây"].map((label, index) => {
+            const value = [
+              timeLeft.days,
+              timeLeft.hours,
+              timeLeft.minutes,
+              timeLeft.seconds,
+            ][index];
             return (
               <Box
                 key={label}
                 sx={{
-                  bgcolor: "#fff",
-                  color: "#000",
-                  borderRadius: "50%",
+                  background: "linear-gradient(145deg, #fff, #f4f4f4)",
+                  color: "#333",
+                  borderRadius: 2,
                   width: 70,
-                  height: 70,
+                  height: 80,
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontWeight: "bold",
+                  boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
                 }}
               >
-                <Typography variant="h6">
+                <Typography variant="h6" fontWeight="bold">
                   <AnimatedNumberRolling number={value} duration={0.4} />
                 </Typography>
-                <Typography variant="caption" fontSize={12}>
-                  {label}
-                </Typography>
+                <Typography variant="caption">{label}</Typography>
               </Box>
             );
           })}
@@ -147,14 +131,17 @@ const CountdownSaleBanner: React.FC = () => {
 
         <Button
           variant="contained"
+          size="large"
           sx={{
-            backgroundColor: "#ff6f00",
-            color: "#fff",
+            backgroundColor: "#ffffff",
+            color: "#ff6f00",
             fontWeight: "bold",
             px: 4,
             py: 1.5,
+            textTransform: "none",
+            borderRadius: "999px",
             "&:hover": {
-              backgroundColor: "#ff8f00",
+              backgroundColor: "#fff3e0",
             },
           }}
         >
@@ -162,20 +149,20 @@ const CountdownSaleBanner: React.FC = () => {
         </Button>
       </Box>
 
-      {/* Bên phải - hình ảnh */}
+      {/* Product Image */}
       <Box
         flex={1}
         display="flex"
         justifyContent="center"
         alignItems="center"
-        sx={{ mt: { xs: 4, md: 0 } }}
+        mt={{ xs: 4, md: 0 }}
       >
         <Image
-          src={`/${flashSale.product.image}`} // image đã có trong public
-          alt={flashSale.product.title}
-          width={300}
-          height={300}
-          style={{ objectFit: "contain" }}
+          src={flashSale.product.imageUrl?.[0] || "/fallback.jpg"}
+          alt={flashSale.product.name}
+          width={320}
+          height={320}
+          style={{ objectFit: "contain", borderRadius: 20 }}
         />
       </Box>
     </Box>

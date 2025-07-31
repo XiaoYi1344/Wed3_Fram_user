@@ -1,20 +1,20 @@
+"use client";
+
 import React from "react";
 import { Stack, Typography, Box, Breadcrumbs } from "@mui/material";
 import Image from "next/image";
 import Link from "next/link";
 
 const MainLayout: React.FC = () => {
+  const [hasError, setHasError] = React.useState(false);
+
   return (
     <Stack pt={30} pb={10} spacing={4}>
       {/* Breadcrumb */}
       <Stack px={{ xs: 2, md: 14, lg: 20 }}>
         <Breadcrumbs aria-label="breadcrumb">
-          <Link href="/" passHref >
-            <Typography
-              component="a"
-              color="inherit"
-              sx={{ "&:hover": { color: "black" } }}
-            >
+          <Link href="/" style={{ textDecoration: "none" }}>
+            <Typography color="inherit" sx={{ "&:hover": { color: "black" } }}>
               Home
             </Typography>
           </Link>
@@ -65,10 +65,11 @@ const MainLayout: React.FC = () => {
           ml="auto"
         >
           <Image
-            src="/img/about.png"
+            src={hasError ? "/image/no-img.jpg" : "/img/about.webp"}
             alt="About"
             fill
             priority
+            onError={() => setHasError(true)}
             style={{ objectFit: "cover", borderRadius: "5px" }}
           />
         </Box>

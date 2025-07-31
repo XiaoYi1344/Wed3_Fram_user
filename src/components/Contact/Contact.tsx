@@ -1,108 +1,92 @@
+'use client';
+
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Mail, Phone } from "lucide-react";
-import { Stack, Typography, Box, Breadcrumbs, Link } from "@mui/material";
+import {
+  Stack,
+  Typography,
+  Box,
+  Breadcrumbs,
+  Link,
+  Divider,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
 
 const Contact: React.FC = () => {
+  const theme = useTheme();
+  const isMdDown = useMediaQuery(theme.breakpoints.down("md"));
+
   return (
-    <Stack py={30} px={{ xs: 2, md: 14, lg: 20 }} spacing={4}>
-      <Stack>
-        <Breadcrumbs aria-label="breadcrumb">
-          <Link color="inherit" href="/" underline="none" sx={{ '&:hover': { color: 'black' } }}>
-            Home
-          </Link>
-          <Typography color="textPrimary">Contact</Typography>
-        </Breadcrumbs>
-      </Stack>
+    <Stack py={24} px={{ xs: 2, md: 8, lg: 20 }} spacing={6}>
+      {/* Breadcrumb */}
+      <Breadcrumbs aria-label="breadcrumb">
+        <Link
+          color="inherit"
+          href="/"
+          underline="hover"
+          sx={{ "&:hover": { color: "black" }, fontWeight: 500 }}
+        >
+          Home
+        </Link>
+        <Typography color="text.primary" fontWeight={600}>
+          Contact
+        </Typography>
+      </Breadcrumbs>
+
+      {/* Main Content */}
       <Stack
         direction={{ xs: "column", md: "row" }}
-        spacing={4}
-        justifyContent="center"
-        alignItems="flex-start"
-        mt={4}
+        spacing={6}
+        alignItems="stretch"
       >
-        {/* Contact Info Section */}
-        <Card className="w-full md:w-1/3 p-4 shadow-md rounded-lg">
-          <CardContent className="p-0">
+        {/* Contact Info */}
+        <Card className="w-full md:w-1/2 lg:w-1/3 backdrop-blur-md bg-white/60 border border-gray-200 shadow-xl rounded-2xl">
+          <CardContent>
             <Stack spacing={4}>
-              {/* Call To Us */}
-              <Stack
-                direction="row"
-                spacing={2}
-                alignItems="flex-start"
-                pt={4}
-                pl={3}
-              >
-                <Box className="bg-orange-400 p-2 rounded-full text-white">
+              <Typography variant="h5" fontWeight={700}>
+                Get in Touch
+              </Typography>
+
+              <Stack direction="row" spacing={2} alignItems="flex-start">
+                <Box className="bg-orange-500 p-3 rounded-full text-white shadow-md">
                   <Phone size={20} />
                 </Box>
                 <Box>
-                  <Typography
-                    variant="subtitle1"
-                    fontWeight="bold"
-                    sx={{ marginBottom: "24px", marginTop: "-2%" }}
-                    fontSize={{ lg: 25 }}
-                  >
-                    Call To Us
+                  <Typography variant="subtitle1" fontWeight={600}>
+                    Call Us
                   </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{ marginBottom: "15px", marginLeft: "-20%" }}
-                    fontSize={{ lg: 17 }}
-                  >
-                    We are available 24/7, 7 days a week.
+                  <Typography variant="body2" mt={0.5}>
+                    Available 24/7
                   </Typography>
-                  <Typography
-                    variant="body2"
-                    mt={1}
-                    sx={{ marginLeft: "-20%" }}
-                    fontSize={{ lg: 17 }}
-                  >
-                    Phone: +8801611112222
+                  <Typography variant="body2" fontWeight={500}>
+                    +880 1611 112 222
                   </Typography>
                 </Box>
               </Stack>
 
-              <Box component="hr" sx={{ width: "80%", marginLeft: "50%" }} />
+              <Divider />
 
-              {/* Write to Us */}
-              <Stack direction="row" spacing={2} alignItems="flex-start" pl={3}>
-                <Box className="bg-orange-400 p-2 rounded-full text-white">
+              <Stack direction="row" spacing={2} alignItems="flex-start">
+                <Box className="bg-orange-500 p-3 rounded-full text-white shadow-md">
                   <Mail size={20} />
                 </Box>
                 <Box>
-                  <Typography
-                    variant="subtitle1"
-                    fontWeight="bold"
-                    sx={{ marginBottom: "24px", marginTop: "-2%" }}
-                    fontSize={{ xs: 10, md: 15, lg: 25 }}
-                  >
-                    Write to Us
+                  <Typography variant="subtitle1" fontWeight={600}>
+                    Email Us
                   </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{ marginBottom: "15px", marginLeft: "-20%" }}
-                    fontSize={{ lg: 17 }}
-                  >
-                    Fill out our form and we will contact you within 24 hours.
+                  <Typography variant="body2" mt={0.5}>
+                    We&apos;ll reply within 24 hours.
                   </Typography>
-                  <Typography
-                    variant="body2"
-                    mt={1}
-                    sx={{ marginBottom: "15px", marginLeft: "-20%" }}
-                    fontSize={{ lg: 17 }}
-                  >
-                    Emails: customer@exclusive.com
+                  <Typography variant="body2" fontWeight={500}>
+                    customer@exclusive.com
                   </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{ marginLeft: "-20%", marginBottom: "18%" }}
-                    fontSize={{ lg: 17 }}
-                  >
-                    Emails: support@exclusive.com
+                  <Typography variant="body2" fontWeight={500}>
+                    support@exclusive.com
                   </Typography>
                 </Box>
               </Stack>
@@ -110,35 +94,41 @@ const Contact: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Message Form */}
-        <Card className="w-full md:w-2/3 p-6 shadow-md rounded-lg">
-          <CardContent className="p-0">
+        {/* Contact Form */}
+        <Card className="w-full md:w-2/3 backdrop-blur-md bg-white/60 border border-gray-200 shadow-xl rounded-2xl">
+          <CardContent>
             <Stack spacing={4}>
+              <Typography variant="h5" fontWeight={700}>
+                Send Us a Message
+              </Typography>
+
               <Box
                 display="grid"
                 gridTemplateColumns={{ xs: "1fr", md: "repeat(3, 1fr)" }}
                 gap={2}
               >
                 <Input
-                  placeholder="Your Name *"
-                  className="bg-gray-100 rounded-[5px] border-none"
+                  placeholder="Full Name *"
+                  className="bg-gray-100 rounded-xl border-none px-4 py-3 text-sm"
                 />
                 <Input
-                  placeholder="Your Email *"
-                  className="bg-gray-100 rounded-[5px] border-none"
+                  placeholder="Email Address *"
+                  className="bg-gray-100 rounded-xl border-none px-4 py-3 text-sm"
                 />
                 <Input
-                  placeholder="Your Phone *"
-                  className="bg-gray-100 rounded-[5px] border-none"
+                  placeholder="Phone Number *"
+                  className="bg-gray-100 rounded-xl border-none px-4 py-3 text-sm"
                 />
               </Box>
+
               <Textarea
-                placeholder="Your Message"
-                rows={18}
-                className="h-auto min-h-[313px] bg-gray-100 rounded-[5px] border-none"
+                placeholder="Write your message here..."
+                rows={isMdDown ? 8 : 20}
+                className="bg-gray-100 rounded-xl border-none px-4 py-3 text-sm"
               />
+
               <Box display="flex" justifyContent="flex-end">
-                <Button className="bg-orange-500 hover:bg-orange-600 text-white">
+                <Button className="bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-6 py-2 rounded-xl shadow-md">
                   Send Message
                 </Button>
               </Box>
@@ -150,4 +140,4 @@ const Contact: React.FC = () => {
   );
 };
 
-export default Contact;
+export default React.memo(Contact);
