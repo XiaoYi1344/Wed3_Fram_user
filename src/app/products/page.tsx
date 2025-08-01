@@ -1,6 +1,7 @@
 import ProductListPage from "@/components/Home/Product/Product/CardListWithFilter";
 import { fetchCategories } from "@/services/axiosInstance";
-import { Category } from "@/constant/type-res-api";
+// import { Category } from "@/constant/type-res-api";
+import { Suspense } from "react";
 
 // ✅ Metadata for SEO
 export const metadata = {
@@ -13,7 +14,11 @@ export const metadata = {
 };
 
 export default async function ProductPage() {
-  const categories: Category[] = await fetchCategories();
+  const categories = await fetchCategories();
 
-  return <ProductListPage categories={categories} />;
+  return (
+    <Suspense fallback={<div>Đang tải sản phẩm...</div>}>
+      <ProductListPage categories={categories} />
+    </Suspense>
+  );
 }
