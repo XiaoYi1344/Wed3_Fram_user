@@ -23,7 +23,7 @@ import {
 
 // ========== AXIOS CONFIG ==========
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_BASE_URL || "http://192.168.1.73:3000",
+  baseURL: process.env.NEXT_PUBLIC_BASE_URL || "http://192.168.1.66:3000",
 });
 
 // ========== REQUEST INTERCEPTOR ==========
