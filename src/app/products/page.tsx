@@ -1,14 +1,19 @@
-// app/products/page.tsx
-import ClientProductPage from "./ClientProductPage";
+import ProductListPage from "@/components/Home/Product/Product/CardListWithFilter";
+import { fetchCategories } from "@/services/axiosInstance";
+import { Category } from "@/constant/type-res-api";
 
+// ✅ Metadata for SEO
 export const metadata = {
-  title: "Sản phẩm | Nông nghiệp thông minh",
-  description: "Xem danh sách các sản phẩm nông nghiệp chất lượng cao.",
-  alternates: {
-    canonical: "https://yourdomain.com/products",
+  title: "Tất cả sản phẩm | My Shop",
+  description: "Khám phá danh sách sản phẩm từ My Shop.",
+  openGraph: {
+    title: "Tất cả sản phẩm | My Shop",
+    description: "Khám phá sản phẩm chất lượng với giá tốt.",
   },
 };
 
-export default function ProductPage() {
-  return <ClientProductPage />;
+export default async function ProductPage() {
+  const categories: Category[] = await fetchCategories();
+
+  return <ProductListPage categories={categories} />;
 }
